@@ -101,13 +101,19 @@
         body: JSON.stringify(data),
         headers: { "Content-Type": "text/plain;charset=utf-8" }
       })
-      .then(res => res.json())
+     .then(res => res.json())
       .then(res => {
         if (res.result === "success") {
           document.getElementById("message").textContent = "✅ Order submitted successfully!";
           form.reset();
           addressInput.readOnly = false;
-        } else {
+          
+          gtag('event', 'order_submit', {
+          'quantity': data.quantity,
+          'payment': data.payment,
+          'delivery': data.delivery
+        });
+        } else { 
           document.getElementById("message").textContent = "❌ Error: " + res.message;
         }
       })
@@ -121,6 +127,7 @@
   </script>
 </body>
 </html>
+
 
 
 
