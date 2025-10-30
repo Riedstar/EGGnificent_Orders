@@ -103,14 +103,15 @@
     }
   })
   .catch(() => {
-    // CORS blocks response read, but data saves anyway—treat as success!
-    document.getElementById("message").textContent = "✅ Order submitted successfully!";
-    form.reset();
-    addressInput.readOnly = false;
-  });
+  // Silent: CORS blocks response, but data saves anyway—no user alert needed
+  document.getElementById("message").textContent = "✅ Order submitted successfully!";
+  form.reset();
+  addressInput.readOnly = false;
+});
 
   </script>
 </body>
 </html>
+
 
 
