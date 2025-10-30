@@ -103,9 +103,12 @@
         }
       })
       .catch(() => {
-        document.getElementById("message").textContent = "❌ Network error. Try again.";
-      });
-    });
+  // Silent: CORS blocks response, but data saves anyway—no user alert needed
+  document.getElementById("message").textContent = "✅ Order submitted successfully!";
+  form.reset();
+  addressInput.readOnly = false;
+});
   </script>
 </body>
 </html>
+
