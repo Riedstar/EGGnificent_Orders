@@ -85,7 +85,7 @@
   form.reset();
   addressInput.readOnly = false;
 
-  // Silent background POST (no UI impact from CORS)
+  // Fire the POST in the background (no UI wait)
   fetch(scriptURL, {
     method: "POST",
     body: JSON.stringify(data),
@@ -94,12 +94,13 @@
   .then(res => res.json())
   .then(res => {
     if (res.result !== "success") {
-      console.warn("Server response: " + res.message);  // Just for your logs
+      console.warn("Server said: " + res.message);  // Silent log if error
+      document.getElementById("message").textContent = "❌ Server issue—check your email to confirm.";
     }
   })
   .catch(err => {
-    console.error("Silent fetch issue:", err);  // Logs to F12 for you, ignores user
-    // No red message—keeps it happy!
+    console.error("Silent fetch error:", err);  // Logs for you, but UI stays happy
+    // Optional: Revert to error only if you want paranoia
+    // document.getElementById("message").textContent = "❌ Network error. Try again.";
   });
 });
-
