@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EGGnificent Order Form</title>
+  <style>
+    body { font-family: "Poppins", sans-serif; background: #fff8e1; color: #333; padding: 20px; max-width: 500px; margin: 0 auto; }
+    h1 { text-align: center; color: #d97706; }
+    form { display: flex; flex-direction: column; gap: 12px; }
+    input, select, textarea { padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 1em; }
+    input[readonly], textarea[readonly] { background-color: #f3f3f3; }
+    button { background: #f59e0b; color: white; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    button:hover { background: #d97706; }
+    #message { text-align: center; font-weight: bold; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>🥚 EGGnificent Orders</h1>
+  <form id="orderForm">
+    <input type="text" id="name" placeholder="Full Name" required />
+    <input type="tel" id="phone" placeholder="Phone Number" required />
+    <select id="quantity" required>
+      <option value="">Select Quantity</option>
+      <option value="1 Tray">1 Tray</option>
+      <option value="2 Trays">2 Trays</option>
+      <option value="3 Trays">3 Trays</option>
+      <option value="4 Trays">4 Trays</option>
+      <option value="5 Trays">5 Trays</option>
+      <option value="6 Trays">6 Trays</option>
+      <option value="7 Trays">7 Trays</option>
+      <option value="8 Trays">8 Trays</option>
+      <option value="9 Trays">9 Trays</option>
+      <option value="10 Trays">10 Trays</option>
+    </select>
+    <select id="payment" required>
+      <option value="">Select Payment Method</option>
+      <option value="Cash">Cash</option>
+      <option value="Card">Card</option>
+    </select>
+    <select id="delivery" required>
+      <option value="">Select Delivery Option</option>
+      <option value="Delivery">Delivery</option>
+      <option value="Collection">Collection</option>
+    </select>
+    <textarea id="address" placeholder="Delivery Address" required></textarea>
+    <textarea id="notes" placeholder="Example: 'Bring change for XXX amount' or 'Please deliver at 17h00'" required></textarea>
+    <button type="submit">Submit Order</button>
+  </form>
+  <p id="message"></p>
+  
+  <!-- ✅ All JavaScript logic goes inside this script tag -->
+  <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbwi8uc_Zc0JYv-1sOfpTJlUSo8SHORCJJ7I_ILrahd8ONzhN_9ARLRRUa26AZCnUD5W/exec";
+    const form = document.getElementById("orderForm");
+    const deliverySelect = document.getElementById("delivery");
+    const addressInput = document.getElementById("address");
+
+    // Automatically set the address when "Collection" is selected
+    deliverySelect.addEventListener("change", () => {
+      if (deliverySelect.value === "Collection") {
+        addressInput.value = "No 17 Lucas Street Ext 9 Eldorado Park 1811";
+        addressInput.readOnly = true;
+      } else {
+        addressInput.value = "";
+        addressInput.readOnly = false;
+      }
+    });
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const data = {
+        name: document.getElementById("name").value.trim(),
+        phone: document.getElementById("phone").value.trim(),
+        quantity: document.getElementById("quantity").value,
+        payment: document.getElementById("payment").value,
+        delivery: document.getElementById("delivery").value,
+        address: document.getElementById("address").value.trim(),
+        notes: document.getElementById("notes").value.trim()
+      };
+
+      fetch(scriptURL, {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: { "Content-Type": "application/json" }
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.result === "success") {
+          document.getElementById("message").textContent = "✅ Order submitted successfully!";
+          form.reset();
+          addressInput.readOnly = false;
+        } else {
+          document.getElementById("message").textContent = "❌ Error: " + res.message;
+        }
+      })
+      .catch(() => {
+        document.getElementById("message").textContent = "❌ Network error. Try again.";
+      });
+    });
+  </script>
+</body>
+</html>
+
+  
