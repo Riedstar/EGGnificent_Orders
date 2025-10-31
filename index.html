@@ -78,8 +78,8 @@
   const deliverySelect = document.getElementById("delivery");
   const addressInput = document.getElementById("address");
 
-  // Pricing & Loyalty function (call on change/submit)
-  async function updatePricing() {
+  // Pricing & Loyalty function (returns calc values for display/submit)
+  async function getPricing() {
     const quantity = document.getElementById("quantity").value;
     const delivery = document.getElementById("delivery").value;
     const payment = document.getElementById("payment").value;
@@ -89,7 +89,7 @@
     if (!quantity || !payment || !delivery) {
       document.getElementById("total").textContent = "Total: R0.00";
       document.getElementById("loyalty-status").textContent = "Loyalty: 0/12 trays to freebie";
-      return;
+      return { total: 0, loyaltyDiscount: 0, pointsEarned: 0, loyaltyStatus: "" };
     }
     
     let trays = parseInt(quantity.match(/\d+/)?.[0] || 0);  // Extract number from "2 Trays"
@@ -97,9 +97,13 @@
     let deliveryFee = 0;  // Zero-rated base
     let paymentFee = 0;  // Zero-rated always
     let loyaltyDiscount = 0;
+    let loyaltyStatus = "";
     
-    // Delivery free only in Eldorado Park or Klipspruit West include key words like Eldos and Klipspruit
-    if (delivery === "Delivery" && (address.includes("eldorado park", "Eldos") || address.includes("klipspruit west", "Klipspruit"))) {
+    // Delivery free only in Eldorado Park/Eldos or Klipspruit (short/full)
+    if (delivery === "Delivery" && (
+      address.includes("eldorado park") || address.includes("eldos") ||
+      address.includes("klipspruit west") || address.includes("klipspruit")
+    )) {
       deliveryFee = 0;
     } else if (delivery === "Delivery") {
       deliveryFee = 20;  // Standard fee outside free zones
@@ -107,8 +111,8 @@
     
     if (phone) {
       try {
-        // Fetch past trays from GAS (new GET endpoint we'll add in Step 3)
-        const loyaltyRes = await fetch(scriptURL.replace('/exec', '/dev'), {
+        // Fetch past trays from GAS (/exec with POST action)
+        const loyaltyRes = await fetch(scriptURL, {
           method: 'POST',
           body: JSON.stringify({ action: 'getLoyalty', phone: phone }),
           headers: { 'Content-Type': 'text/plain;charset=utf-8' }
@@ -116,36 +120,41 @@
         const loyaltyData = await loyaltyRes.json();
         let pastTrays = loyaltyData.pastTrays || 0;
         let pointsToFree = 12 - (pastTrays % 13);  // e.g., 12 total = 1 free on 13th
-        document.getElementById("loyalty-status").textContent = `Loyalty: ${pastTrays % 13}/12 trays to freebie`;
+        loyaltyStatus = `Loyalty: ${pastTrays % 13}/12 trays to freebie`;
         
         if (pastTrays % 13 === 0) {  // Eligible for free tray
           loyaltyDiscount = 65;  // Full R65 off
-          document.getElementById("loyalty-status").textContent += " (Free tray unlocked!)";
+          loyaltyStatus += " (Free tray unlocked!)";
         }
+        document.getElementById("loyalty-status").textContent = loyaltyStatus;
       } catch (err) {
         console.warn("Loyalty check failed:", err);
         document.getElementById("loyalty-status").textContent = "Loyalty: Check later";
       }
+    } else {
+      document.getElementById("loyalty-status").textContent = "Loyalty: 0/12 trays to freebie";
     }
     
     let total = base + deliveryFee + paymentFee - loyaltyDiscount;
     document.getElementById("total").textContent = `Total: R${total.toFixed(2)}`;
     
-    // Add to data for sheet/email (use in submit)
-    data.total = total;
-    data.loyaltyDiscount = loyaltyDiscount;
-    data.pointsEarned = trays;  // Track for next time
+    return {
+      total: total,
+      loyaltyDiscount: loyaltyDiscount,
+      pointsEarned: trays,
+      loyaltyStatus: loyaltyStatus
+    };
   }
 
-  // Listen for changes (update on phone/quantity/delivery/payment/address)
-  document.getElementById("phone").addEventListener("blur", updatePricing);  // On phone enter
-  document.getElementById("quantity").addEventListener("change", updatePricing);
-  document.getElementById("delivery").addEventListener("change", updatePricing);
-  document.getElementById("payment").addEventListener("change", updatePricing);
-  document.getElementById("address").addEventListener("blur", updatePricing);  // On address enter
+  // Listen for changes
+  document.getElementById("phone").addEventListener("blur", getPricing);
+  document.getElementById("quantity").addEventListener("change", getPricing);
+  document.getElementById("delivery").addEventListener("change", getPricing);
+  document.getElementById("payment").addEventListener("change", getPricing);
+  document.getElementById("address").addEventListener("blur", getPricing);
 
-  // Call on load if form filled
-  window.addEventListener("load", updatePricing);
+  // Call on load
+  window.addEventListener("load", getPricing);
 
   // Automatically set the address when "Collection" is selected
   deliverySelect.addEventListener("change", () => {
@@ -156,7 +165,7 @@
       addressInput.value = "";
       addressInput.readOnly = false;
     }
-    updatePricing();  // Recalc total after address change
+    getPricing();  // Recalc after change
   });
 
   form.addEventListener("submit", (e) => {
@@ -169,16 +178,17 @@
       payment: document.getElementById("payment").value,
       delivery: document.getElementById("delivery").value,
       address: document.getElementById("address").value.trim(),
-      notes: document.getElementById("notes").value.trim(),
-      total: 0,  // Filled by updatePricing
-      loyaltyDiscount: 0,
-      pointsEarned: 0
+      notes: document.getElementById("notes").value.trim()
     };
 
-    // Final pricing calc before submit
-    updatePricing();
+    // Calc pricing & set data fields
+    const pricing = getPricing();
+    data.total = pricing.total;
+    data.loyaltyDiscount = pricing.loyaltyDiscount;
+    data.pointsEarned = pricing.pointsEarned;
+    data.loyaltyStatus = pricing.loyaltyStatus;
 
-    // Track event optimistically—fires every submit
+    // Track event
     gtag('event', 'order_submit', {
       'quantity': data.quantity,
       'payment': data.payment,
@@ -186,27 +196,31 @@
       'total': data.total
     });
 
-    // Show success UI immediately
+    // Show success
     document.getElementById("message").textContent = "✅ Order submitted successfully!";
     form.reset();
     addressInput.readOnly = false;
 
-    // Fetch in background (silent—no UI dependency)
-    fetch(scriptURL, {
-      method: "POST",
-      body: JSON.stringify(data),
-      headers: { "Content-Type": "text/plain;charset=utf-8" }
-    })
-    .then(res => res.json())
-    .then(res => {
-      if (res.result !== "success") {
-        console.warn("Server said: " + res.message);  // Silent log only
-      }
-    })
-    .catch(err => {
-      console.error("Silent fetch issue:", err);  // Logs for you
-    });
+    // Fetch (only if data is valid—prevent dupes/empties)
+    if (data.name && data.phone && data.quantity) {
+      fetch(scriptURL, {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: { "Content-Type": "text/plain;charset=utf-8" }
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.result !== "success") {
+          console.warn("Server said: " + res.message);
+        }
+      })
+      .catch(err => {
+        console.error("Silent fetch issue:", err);
+      });
+    } else {
+      console.warn("Invalid data—skipping submit");
+    }
   });
 </script>
-  
 
+  
