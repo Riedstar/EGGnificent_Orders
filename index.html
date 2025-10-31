@@ -13,7 +13,7 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-7F8KJ3RJKW');  // Replace GA_MEASUREMENT_ID with yours (e.g., G-ABC123XYZ)
+    gtag('config', 'G-7F8KJ3RJKW');
   </script>
   <style>
     body { 
@@ -65,163 +65,160 @@
     <textarea id="notes" placeholder="Example: 'Bring change for XXX amount' or 'Please deliver at 17h00'" required></textarea>
     <button type="submit">Submit Order</button>
   </form>
-    <div id="pricing" style="text-align: center; margin-top: 10px;">
+  <div id="pricing" style="text-align: center; margin-top: 10px;">
     <div id="loyalty-status" style="color: #d97706; font-weight: bold;">Loyalty: 0/12 trays to freebie</div>
     <div id="total" style="color: #333; font-weight: bold;">Total: R0.00</div>
   </div>
-  
   <p id="message"></p>
 
   <script>
-  const scriptURL = "https://script.google.com/macros/s/AKfycbwi8uc_Zc0JYv-1sOfpTJlUSo8SHORCJJ7I_ILrahd8ONzhN_9ARLRRUa26AZCnUD5W/exec";
-  const form = document.getElementById("orderForm");
-  const deliverySelect = document.getElementById("delivery");
-  const addressInput = document.getElementById("address");
+    const scriptURL = "https://script.google.com/macros/s/AKfycbwi8uc_Zc0JYv-1sOfpTJlUSo8SHORCJJ7I_ILrahd8ONzhN_9ARLRRUa26AZCnUD5W/exec";
+    const form = document.getElementById("orderForm");
+    const deliverySelect = document.getElementById("delivery");
+    const addressInput = document.getElementById("address");
 
-  // Pricing & Loyalty function (returns calc values for display/submit)
-  async function getPricing() {
-    const quantity = document.getElementById("quantity").value;
-    const delivery = document.getElementById("delivery").value;
-    const payment = document.getElementById("payment").value;
-    const phone = document.getElementById("phone").value.trim();
-    const address = document.getElementById("address").value.toLowerCase();  // For suburb check
-    
-    if (!quantity || !payment || !delivery) {
-      document.getElementById("total").textContent = "Total: R0.00";
-      document.getElementById("loyalty-status").textContent = "Loyalty: 0/12 trays to freebie";
-      return { total: 0, loyaltyDiscount: 0, pointsEarned: 0, loyaltyStatus: "" };
-    }
-    
-    let trays = parseInt(quantity.match(/\d+/)?.[0] || 0);  // Extract number from "2 Trays"
-    let base = trays * 65;  // R65/tray
-    let deliveryFee = 0;  // Zero-rated base
-    let paymentFee = 0;  // Zero-rated always
-    let loyaltyDiscount = 0;
-    let loyaltyStatus = "";
-    
-    // Delivery free only in Eldorado Park/Eldos or Klipspruit (short/full)
-    if (delivery === "Delivery" && (
-      address.includes("eldorado park") || address.includes("eldos") ||
-      address.includes("klipspruit west") || address.includes("klipspruit")
-    )) {
-      deliveryFee = 0;
-    } else if (delivery === "Delivery") {
-      deliveryFee = 20;  // Standard fee outside free zones
-    }
-    
-    if (phone) {
-      try {
-        // Fetch past trays from GAS (/exec with POST action—no /dev)
-        const loyaltyRes = await fetch(scriptURL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'getLoyalty', phone: phone }),
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          mode: 'no-cors'  // Silent CORS for lookup
-        });
-        const loyaltyData = await loyaltyRes.json();
-        let pastTrays = loyaltyData.pastTrays || 0;
-        let pointsToFree = 12 - (pastTrays % 13);  // e.g., 12 total = 1 free on 13th
-        loyaltyStatus = `Loyalty: ${pastTrays % 13}/12 trays to freebie`;
-        
-        if (pastTrays % 13 === 0) {  // Eligible for free tray
-          loyaltyDiscount = 65;  // Full R65 off
-          loyaltyStatus += " (Free tray unlocked!)";
-        }
-        document.getElementById("loyalty-status").textContent = loyaltyStatus;
-      } catch (err) {
-        console.warn("Loyalty check failed:", err);
-        document.getElementById("loyalty-status").textContent = "Loyalty: Check later";
+    // Pricing & Loyalty function (returns calc values for display/submit)
+    async function getPricing() {
+      const quantity = document.getElementById("quantity").value;
+      const delivery = document.getElementById("delivery").value;
+      const payment = document.getElementById("payment").value;
+      const phone = document.getElementById("phone").value.trim();
+      const address = document.getElementById("address").value.toLowerCase();  // For suburb check
+      
+      if (!quantity || !payment || !delivery) {
+        document.getElementById("total").textContent = "Total: R0.00";
+        document.getElementById("loyalty-status").textContent = "Loyalty: 0/12 trays to freebie";
+        return { total: 0, loyaltyDiscount: 0, pointsEarned: 0, loyaltyStatus: "" };
       }
-    } else {
-      document.getElementById("loyalty-status").textContent = "Loyalty: 0/12 trays to freebie";
+      
+      let trays = parseInt(quantity.match(/\d+/)?.[0] || 0);  // Extract number from "2 Trays"
+      let base = trays * 65;  // R65/tray
+      let deliveryFee = 0;  // Zero-rated base
+      let paymentFee = 0;  // Zero-rated always
+      let loyaltyDiscount = 0;
+      let loyaltyStatus = "";
+      
+      // Delivery free only in Eldorado Park/Eldos or Klipspruit (short/full)
+      if (delivery === "Delivery" && (
+        address.includes("eldorado park") || address.includes("eldos") ||
+        address.includes("klipspruit west") || address.includes("klipspruit")
+      )) {
+        deliveryFee = 0;
+      } else if (delivery === "Delivery") {
+        deliveryFee = 20;  // Standard fee outside free zones
+      }
+      
+      if (phone) {
+        try {
+          // Fetch past trays from GAS (/exec with POST action—no /dev)
+          const loyaltyRes = await fetch(scriptURL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'getLoyalty', phone: phone }),
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            mode: 'no-cors'  // Silent CORS for lookup
+          });
+          const loyaltyData = await loyaltyRes.json();
+          let pastTrays = loyaltyData.pastTrays || 0;
+          let pointsToFree = 12 - (pastTrays % 13);  // e.g., 12 total = 1 free on 13th
+          loyaltyStatus = `Loyalty: ${pastTrays % 13}/12 trays to freebie`;
+          
+          if (pastTrays % 13 === 0) {  // Eligible for free tray
+            loyaltyDiscount = 65;  // Full R65 off
+            loyaltyStatus += " (Free tray unlocked!)";
+          }
+          document.getElementById("loyalty-status").textContent = loyaltyStatus;
+        } catch (err) {
+          console.warn("Loyalty check failed:", err);
+          document.getElementById("loyalty-status").textContent = "Loyalty: Check later";
+        }
+      } else {
+        document.getElementById("loyalty-status").textContent = "Loyalty: 0/12 trays to freebie";
+      }
+      
+      let total = base + deliveryFee + paymentFee - loyaltyDiscount;
+      document.getElementById("total").textContent = `Total: R${total.toFixed(2)}`;
+      
+      return {
+        total: total,
+        loyaltyDiscount: loyaltyDiscount,
+        pointsEarned: trays,
+        loyaltyStatus: loyaltyStatus
+      };
     }
-    
-    let total = base + deliveryFee + paymentFee - loyaltyDiscount;
-    document.getElementById("total").textContent = `Total: R${total.toFixed(2)}`;
-    
-    return {
-      total: total,
-      loyaltyDiscount: loyaltyDiscount,
-      pointsEarned: trays,
-      loyaltyStatus: loyaltyStatus
-    };
-  }
 
-  // Listen for changes
-  document.getElementById("phone").addEventListener("blur", getPricing);
-  document.getElementById("quantity").addEventListener("change", getPricing);
-  document.getElementById("delivery").addEventListener("change", getPricing);
-  document.getElementById("payment").addEventListener("change", getPricing);
-  document.getElementById("address").addEventListener("blur", getPricing);
+    // Listen for changes
+    document.getElementById("phone").addEventListener("blur", getPricing);
+    document.getElementById("quantity").addEventListener("change", getPricing);
+    document.getElementById("delivery").addEventListener("change", getPricing);
+    document.getElementById("payment").addEventListener("change", getPricing);
+    document.getElementById("address").addEventListener("blur", getPricing);
 
-  // Call on load
-  window.addEventListener("load", getPricing);
+    // Call on load
+    window.addEventListener("load", getPricing);
 
-  // Automatically set the address when "Collection" is selected
-  deliverySelect.addEventListener("change", () => {
-    if (deliverySelect.value === "Collection") {
-      addressInput.value = "No 17 Lucas Street Ext 9 Eldorado Park 1811";
-      addressInput.readOnly = true;
-    } else {
-      addressInput.value = "";
-      addressInput.readOnly = false;
-    }
-    getPricing();  // Recalc after change
-  });
-
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-
-    const data = {
-      name: document.getElementById("name").value.trim(),
-      phone: document.getElementById("phone").value.trim(),
-      quantity: document.getElementById("quantity").value,
-      payment: document.getElementById("payment").value,
-      delivery: document.getElementById("delivery").value,
-      address: document.getElementById("address").value.trim(),
-      notes: document.getElementById("notes").value.trim()
-    };
-
-    // Calc pricing & set data fields
-    const pricing = getPricing();
-    data.total = pricing.total;
-    data.loyaltyDiscount = pricing.loyaltyDiscount;
-    data.pointsEarned = pricing.pointsEarned;
-    data.loyaltyStatus = pricing.loyaltyStatus;
-
-    // Track event
-    gtag('event', 'order_submit', {
-      'quantity': data.quantity,
-      'payment': data.payment,
-      'delivery': data.delivery,
-      'total': data.total
+    // Automatically set the address when "Collection" is selected
+    deliverySelect.addEventListener("change", () => {
+      if (deliverySelect.value === "Collection") {
+        addressInput.value = "No 17 Lucas Street Ext 9 Eldorado Park 1811";
+        addressInput.readOnly = true;
+      } else {
+        addressInput.value = "";
+        addressInput.readOnly = false;
+      }
+      getPricing();  // Recalc after change
     });
 
-    // Show success
-    document.getElementById("message").textContent = "✅ Order submitted successfully!";
-    form.reset();
-    addressInput.readOnly = false;
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
 
-    // Fetch (only if data is valid—prevent dupes/empties)
-    if (data.name && data.phone && data.quantity) {
-      fetch(scriptURL, {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        mode: 'no-cors'  // Silent CORS for submit
-      })
-      .then(res => res.json())
-      .then(res => {
-        if (res.result !== "success") {
-          console.warn("Server said: " + res.message);
-        }
-      })
-      .catch(err => {
-        console.error("Silent fetch issue:", err);
+      const data = {
+        name: document.getElementById("name").value.trim(),
+        phone: document.getElementById("phone").value.trim(),
+        quantity: document.getElementById("quantity").value,
+        payment: document.getElementById("payment").value,
+        delivery: document.getElementById("delivery").value,
+        address: document.getElementById("address").value.trim(),
+        notes: document.getElementById("notes").value.trim()
+      };
+
+      // Calc pricing & set data fields
+      const pricing = getPricing();
+      data.total = pricing.total;
+      data.loyaltyDiscount = pricing.loyaltyDiscount;
+      data.pointsEarned = pricing.pointsEarned;
+      data.loyaltyStatus = pricing.loyaltyStatus;
+
+      // Track event
+      gtag('event', 'order_submit', {
+        'quantity': data.quantity,
+        'payment': data.payment,
+        'delivery': data.delivery,
+        'total': data.total
       });
-    } else {
-      console.warn("Invalid data—skipping submit");
-    }
-  });
-</script>
 
+      // Show success
+      document.getElementById("message").textContent = "✅ Order submitted successfully!";
+      form.reset();
+      addressInput.readOnly = false;
+
+      // Fetch (only if data is valid—prevent dupes/empties)
+      if (data.name && data.phone && data.quantity) {
+        fetch(scriptURL, {
+          method: "POST",
+          body: JSON.stringify(data),
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          mode: 'no-cors'  // Silent CORS for submit
+        })
+        .then(() => {
+          // No .json() – no-cors blocks read, but data saves
+        })
+        .catch(err => {
+          console.error("Silent fetch issue:", err);
+        });
+      } else {
+        console.warn("Invalid data—skipping submit");
+      }
+    });
+  </script>
+</body>
+</html>
