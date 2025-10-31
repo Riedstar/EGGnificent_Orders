@@ -67,62 +67,64 @@
   <p id="message"></p>
   
   <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbwi8uc_Zc0JYv-1sOfpTJlUSo8SHORCJJ7I_ILrahd8ONzhN_9ARLRRUa26AZCnUD5W/exec";
-    const form = document.getElementById("orderForm");
-    const deliverySelect = document.getElementById("delivery");
-    const addressInput = document.getElementById("address");
+  const scriptURL = "https://script.google.com/macros/s/AKfycbwi8uc_Zc0JYv-1sOfpTJlUSo8SHORCJJ7I_ILrahd8ONzhN_9ARLRRUa26AZCnUD5W/exec";
+  const form = document.getElementById("orderForm");
+  const deliverySelect = document.getElementById("delivery");
+  const addressInput = document.getElementById("address");
 
-    // Automatically set the address when "Collection" is selected
-    deliverySelect.addEventListener("change", () => {
-      if (deliverySelect.value === "Collection") {
-        addressInput.value = "No 17 Lucas Street Ext 9 Eldorado Park 1811";
-        addressInput.readOnly = true;
-      } else {
-        addressInput.value = "";
-        addressInput.readOnly = false;
-      }
-    });
-    
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-    
-      const data = {
-        name: document.getElementById("name").value.trim(),
-        phone: document.getElementById("phone").value.trim(),
-        quantity: document.getElementById("quantity").value,
-        payment: document.getElementById("payment").value,
-        delivery: document.getElementById("delivery").value,
-        address: document.getElementById("address").value.trim(),
-        notes: document.getElementById("notes").value.trim()
-      };
-    
-      // Track event optimistically (if you have GA—fires every submit)
-      gtag('event', 'order_submit', {
-        'quantity': data.quantity,
-        'payment': data.payment,
-        'delivery': data.delivery
-      });
-    
-      // Show success UI immediately (data saves reliably)
-      document.getElementById("message").textContent = "✅ Order submitted successfully!";
-      form.reset();
+  // Automatically set the address when "Collection" is selected
+  deliverySelect.addEventListener("change", () => {
+    if (deliverySelect.value === "Collection") {
+      addressInput.value = "No 17 Lucas Street Ext 9 Eldorado Park 1811";
+      addressInput.readOnly = true;
+    } else {
+      addressInput.value = "";
       addressInput.readOnly = false;
-    
-      // Fetch in background (silent—no UI dependency)
-      fetch(scriptURL, {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "text/plain;charset=utf-8" }
-      })
-      .then(res => res.json())
-      .then(res => {
-        if (res.result !== "success") {
-          console.warn("Server said: " + res.message);  // Silent log only
-        }
-      })
-      .catch(err => {
-        console.error("Silent fetch issue:", err);  // Logs for you
-      });
+    }
+  });
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const data = {
+      name: document.getElementById("name").value.trim(),
+      phone: document.getElementById("phone").value.trim(),
+      quantity: document.getElementById("quantity").value,
+      payment: document.getElementById("payment").value,
+      delivery: document.getElementById("delivery").value,
+      address: document.getElementById("address").value.trim(),
+      notes: document.getElementById("notes").value.trim()
+    };
+
+    // Track event optimistically—fires every submit (data always saves!)
+    gtag('event', 'order_submit', {
+      'quantity': data.quantity,
+      'payment': data.payment,
+      'delivery': data.delivery
     });
+
+    // Show success UI immediately
+    document.getElementById("message").textContent = "✅ Order submitted successfully!";
+    form.reset();
+    addressInput.readOnly = false;
+
+    // Fetch in background (silent—no UI dependency)
+    fetch(scriptURL, {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: { "Content-Type": "text/plain;charset=utf-8" }
+    })
+    .then(res => res.json())
+    .then(res => {
+      if (res.result !== "success") {
+        console.warn("Server said: " + res.message);  // Silent log only
+      }
+    })
+    .catch(err => {
+      console.error("Silent fetch issue:", err);  // Logs for you
+    });
+  });
+</script>
+
 
 
