@@ -111,11 +111,12 @@
     
     if (phone) {
       try {
-        // Fetch past trays from GAS (/exec with POST action)
+        // Fetch past trays from GAS (/exec with POST action—no /dev)
         const loyaltyRes = await fetch(scriptURL, {
           method: 'POST',
           body: JSON.stringify({ action: 'getLoyalty', phone: phone }),
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          mode: 'no-cors'  // Silent CORS for lookup
         });
         const loyaltyData = await loyaltyRes.json();
         let pastTrays = loyaltyData.pastTrays || 0;
@@ -206,7 +207,8 @@
       fetch(scriptURL, {
         method: "POST",
         body: JSON.stringify(data),
-        headers: { "Content-Type": "text/plain;charset=utf-8" }
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        mode: 'no-cors'  // Silent CORS for submit
       })
       .then(res => res.json())
       .then(res => {
@@ -223,4 +225,3 @@
   });
 </script>
 
-  
