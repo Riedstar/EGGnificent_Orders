@@ -98,8 +98,8 @@
     let paymentFee = 0;  // Zero-rated always
     let loyaltyDiscount = 0;
     
-    // Delivery free only in Eldorado Park or Klipspruit West
-    if (delivery === "Delivery" && (address.includes("eldorado park") || address.includes("klipspruit west"))) {
+    // Delivery free only in Eldorado Park or Klipspruit West include key words like Eldos and Klipspruit
+    if (delivery === "Delivery" && (address.includes("eldorado park", "Eldos") || address.includes("klipspruit west", "Klipspruit"))) {
       deliveryFee = 0;
     } else if (delivery === "Delivery") {
       deliveryFee = 20;  // Standard fee outside free zones
@@ -209,3 +209,4 @@
   });
 </script>
   
+
