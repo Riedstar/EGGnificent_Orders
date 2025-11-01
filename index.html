@@ -79,44 +79,50 @@
     const addressInput = document.getElementById("address");
 
     // Pricing & Loyalty function (returns calc values for display/submit)
-    function getPricing() {
-      const quantity = document.getElementById("quantity").value;
-      const delivery = document.getElementById("delivery").value;
-      const payment = document.getElementById("payment").value;
-      const address = document.getElementById("address").value.toLowerCase();
-      
-      if (!quantity || !payment || !delivery) {
-        document.getElementById("total").textContent = "Total: R0.00";
-        document.getElementById("loyalty-status").textContent = "Loyalty: 0/12 trays to freebie";
-        return { total: 0, loyaltyDiscount: 0, pointsEarned: 0, loyaltyStatus: "" };
-      }
-      
-      let trays = parseInt(quantity.match(/\d+/)?.[0] || 0);
-      let base = trays * 65;
-      let deliveryFee = 0;
-      let paymentFee = 0;
-      let loyaltyDiscount = 0;
-      let loyaltyStatus = "Loyalty: 0/12 trays to freebie";
-      
-      if (delivery === "Delivery" && (
-        address.includes("eldorado park") || address.includes("eldos") ||
-        address.includes("klipspruit west") || address.includes("klipspruit")
-      )) {
-        deliveryFee = 0;
-      } else if (delivery === "Delivery") {
-        deliveryFee = 20;
-      }
-      
-      let total = base + deliveryFee + paymentFee - loyaltyDiscount;
-      document.getElementById("total").textContent = `Total: R${total.toFixed(2)}`;
-      
-      return {
-        total: total,
-        loyaltyDiscount: loyaltyDiscount,
-        pointsEarned: trays,
-        loyaltyStatus: loyaltyStatus
-      };
+function getPricing() {
+  const quantity = document.getElementById("quantity").value;
+  const delivery = document.getElementById("delivery").value;
+  const payment = document.getElementById("payment").value;
+  const address = document.getElementById("address").value.toLowerCase();  // For suburb check
+  
+  if (!quantity) {
+    document.getElementById("total").textContent = "Total: R0.00";
+    document.getElementById("loyalty-status").textContent = "Loyalty: 0/12 trays to freebie";
+    return { total: 0, loyaltyDiscount: 0, pointsEarned: 0, loyaltyStatus: "" };
+  }
+  
+  let trays = parseInt(quantity.match(/\d+/)?.[0] || 0);  // Extract number from "2 Trays"
+  let base = trays * 65;  // R65/tray
+  let deliveryFee = 0;
+  let paymentFee = 0;
+  let loyaltyDiscount = 0;
+  let loyaltyStatus = "Loyalty: 0/12 trays to freebie";  // Default
+  
+  // Delivery fee (if selected)
+  if (delivery === "Delivery") {
+    if (address.includes("eldorado park") || address.includes("eldos") ||
+        address.includes("klipspruit west") || address.includes("klipspruit")) {
+      deliveryFee = 0;
+    } else {
+      deliveryFee = 20;
     }
+  }
+  
+  // Payment fee (if selected—0 for now)
+  if (payment === "Card") {
+    paymentFee = 0;  // Zero-rated
+  }
+  
+  let total = base + deliveryFee + paymentFee - loyaltyDiscount;
+  document.getElementById("total").textContent = `Total: R${total.toFixed(2)}`;
+  
+  return {
+    total: total,
+    loyaltyDiscount: loyaltyDiscount,
+    pointsEarned: trays,
+    loyaltyStatus: loyaltyStatus
+  };
+}
 
     // Listen for changes
     document.getElementById("phone").addEventListener("blur", getPricing);
@@ -199,3 +205,4 @@
   </script>
 </body>
 </html>
+
