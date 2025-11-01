@@ -165,6 +165,9 @@ function getPricing() {
         loyaltyStatus: ""
       };
 
+      // Generate simple ref for email
+      data.refNum = "EGG-" + new Date().toISOString().slice(0,10).replace(/-/g,'') + "-" + Math.random().toString(36).substring(2,8).toUpperCase().slice(0,4);  // e.g., EGG-20251101-RNDM
+
       // Calc pricing & set data fields
       const pricing = getPricing();
       data.total = pricing.total;
@@ -206,5 +209,6 @@ function getPricing() {
   </script>
 </body>
 </html>
+
 
 
