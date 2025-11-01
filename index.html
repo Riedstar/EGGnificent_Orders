@@ -77,14 +77,13 @@
     const form = document.getElementById("orderForm");
     const deliverySelect = document.getElementById("delivery");
     const addressInput = document.getElementById("address");
-    customerEmail: document.getElementById("customerEmail").value.trim(),
 
     // Pricing & Loyalty function (returns calc values for display/submit)
     function getPricing() {
       const quantity = document.getElementById("quantity").value;
       const delivery = document.getElementById("delivery").value;
       const payment = document.getElementById("payment").value;
-      const address = document.getElementById("address").value.toLowerCase();  // For suburb check
+      const address = document.getElementById("address").value.toLowerCase();
       
       if (!quantity || !payment || !delivery) {
         document.getElementById("total").textContent = "Total: R0.00";
@@ -92,21 +91,20 @@
         return { total: 0, loyaltyDiscount: 0, pointsEarned: 0, loyaltyStatus: "" };
       }
       
-      let trays = parseInt(quantity.match(/\d+/)?.[0] || 0);  // Extract number from "2 Trays"
-      let base = trays * 65;  // R65/tray
-      let deliveryFee = 0;  // Zero-rated base
-      let paymentFee = 0;  // Zero-rated always
+      let trays = parseInt(quantity.match(/\d+/)?.[0] || 0);
+      let base = trays * 65;
+      let deliveryFee = 0;
+      let paymentFee = 0;
       let loyaltyDiscount = 0;
-      let loyaltyStatus = "Loyalty: 0/12 trays to freebie";  // Default (fetch disabled to avoid CORS)
+      let loyaltyStatus = "Loyalty: 0/12 trays to freebie";
       
-      // Delivery free only in Eldorado Park/Eldos or Klipspruit (short/full)
       if (delivery === "Delivery" && (
         address.includes("eldorado park") || address.includes("eldos") ||
         address.includes("klipspruit west") || address.includes("klipspruit")
       )) {
         deliveryFee = 0;
       } else if (delivery === "Delivery") {
-        deliveryFee = 20;  // Standard fee outside free zones
+        deliveryFee = 20;
       }
       
       let total = base + deliveryFee + paymentFee - loyaltyDiscount;
@@ -148,6 +146,7 @@
       const data = {
         name: document.getElementById("name").value.trim(),
         phone: document.getElementById("phone").value.trim(),
+        customerEmail: document.getElementById("customerEmail").value.trim(),
         quantity: document.getElementById("quantity").value,
         payment: document.getElementById("payment").value,
         delivery: document.getElementById("delivery").value,
@@ -200,5 +199,3 @@
   </script>
 </body>
 </html>
-
-
