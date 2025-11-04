@@ -337,17 +337,15 @@
         document.body.appendChild(van);
         setTimeout(() => van.remove(), 3000);
 
-    // Egg bounce cascade
-for (let i = 0; i < 6; i++) {
-  setTimeout(() => {
-    const egg = document.createElement('div');
-    egg.innerHTML = '🥚';
-    egg.style.cssText = 'position: fixed; font-size: 2em; z-index: 1000; left: ' + (50 + (Math.random() - 0.5) * 40) + '%; top: 80vh; animation: bounceUp ' + (1 + Math.random()) + 's ease-out forwards;';
-    document.head.insertAdjacentHTML('beforeend', `
-      <style>
-        @keyframes bounceUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-100vh) scale(0.5); opacity: 0; } }
-      </style>
-    `);
+   // Confetti burst
+        if (typeof confetti !== 'undefined') {
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: ['#f59e0b', '#d97706', '#fff8e1', '#10b981']
+          });
+        }
     document.body.appendChild(egg);
     setTimeout(() => egg.remove(), 3000);
   }, i * 200);  // Staggered for cascade
@@ -384,5 +382,6 @@ for (let i = 0; i < 6; i++) {
   </script>
 </body>
 </html>
+
 
 
