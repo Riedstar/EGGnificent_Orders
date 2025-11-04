@@ -149,6 +149,14 @@
       width: 100vw;
       height: 100vh;
     }
+    /* Recurring Checkbox Styling */
+    #recurring-toggle {
+      margin-right: 8px;
+    }
+    #recurring {
+      margin-left: 24px;
+      transition: margin-left 0.3s ease;
+    }
   </style>
 </head>
 <body>
@@ -179,17 +187,18 @@
       <option value="Delivery">Delivery</option>
       <option value="Collection">Collection</option>
     </select>
-    <!-- Recurring Order Checkbox + Frequency -->
-    <label>
-      <input type="checkbox" id="recurring-toggle" />
-      <span style="font-weight: bold; color: #d97706;">Make this recurring?</span>
-    </label>
-    <select id="recurring" style="display: none;">
-      <option value="">Choose frequency...</option>
-      <option value="weekly">Weekly</option>
-      <option value="bi-weekly">Bi-weekly</option>
-      <option value="monthly">Monthly</option>
-    </select>
+    <div style="margin-left: 20px;">
+      <label>
+        <input type="checkbox" id="recurring-toggle" />
+        <span style="font-weight: bold; color: #d97706;">Make this recurring?</span>
+      </label>
+      <select id="recurring" style="display: none; margin-top: 5px; margin-left: 20px;">
+        <option value="">Choose frequency...</option>
+        <option value="weekly">Weekly</option>
+        <option value="bi-weekly">Bi-weekly</option>
+        <option value="monthly">Monthly</option>
+      </select>
+    </div>
     <textarea id="address" placeholder="🏠 Delivery Address" required autocomplete="street-address"></textarea>
     <textarea id="notes" placeholder="📝 Example: 'Bring change for XXX amount' or 'Please deliver at 17h00'" required></textarea>
     <button type="submit" id="submitBtn">Submit Order</button>
@@ -223,7 +232,7 @@
       const recurring = recurringToggle.checked ? document.getElementById("recurring").value : "one-time";
       const address = document.getElementById("address").value.toLowerCase();  // For suburb check
       
-      if (!quantity || !payment || !delivery) {
+      if (!quantity || !delivery || !payment) {
         document.getElementById("total").textContent = "Total: R0.00";
         document.getElementById("loyalty-status").textContent = "Loyalty: 0/12 trays to freebie";
         return { total: 0, loyaltyDiscount: 0, pointsEarned: 0, loyaltyStatus: "" };
@@ -236,12 +245,6 @@
       let loyaltyDiscount = 0;
       let loyaltyStatus = "Loyalty: 0/12 trays to freebie";
       
-      // Optional recurring discount (e.g., 5% off for monthly)
-      if (recurring === "monthly") {
-        loyaltyDiscount = base * 0.05;  // 5% off for monthly
-        loyaltyStatus = "Loyalty: 5% monthly discount applied!";
-      }
-      
       if (delivery === "Delivery" && (
         address.includes("eldorado park") || address.includes("eldos") ||
         address.includes("klipspruit west") || address.includes("klipspruit")
@@ -252,7 +255,7 @@
       }
       
       let total = base + deliveryFee + paymentFee - loyaltyDiscount;
-      document.getElementById("total").textContent = `Total: R${total.toFixed(2)} (${recurring})`;
+      document.getElementById("total").textContent = `Total: R${total.toFixed(2)}`;
       
       return {
         total: total,
@@ -295,7 +298,7 @@
         quantity: document.getElementById("quantity").value,
         payment: document.getElementById("payment").value,
         delivery: document.getElementById("delivery").value,
-        recurring: recurringToggle.checked ? document.getElementById("recurring").value : "one-time",  // New: Capture recurring
+        recurring: recurringToggle.checked ? document.getElementById("recurring").value : "one-time",  // Capture recurring
         address: document.getElementById("address").value.trim(),
         notes: document.getElementById("notes").value.trim()
       };
@@ -312,7 +315,7 @@
         'quantity': data.quantity,
         'payment': data.payment,
         'delivery': data.delivery,
-        'recurring': data.recurring,  // New: Track frequency
+        'recurring': data.recurring,
         'total': data.total
       });
 
