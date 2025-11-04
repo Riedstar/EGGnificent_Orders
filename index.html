@@ -22,9 +22,6 @@
   <!-- Canvas Confetti for Animation -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-  <!-- QR Code for PayShap -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
   <style>
     body { 
       font-family: "Poppins", sans-serif; 
@@ -43,7 +40,7 @@
       animation: fadeInDown 0.8s ease-out;
     }
     @keyframes fadeInDown {
-      from { opacity: 0; transform: translateY(-20px); }
+      from { opacity: 0; transform: translateY(-50px); }
       to { opacity: 1; transform: translateY(0); }
     }
     form { 
@@ -108,9 +105,6 @@
       animation: fadeInUp 0.5s ease-out;
     }
     @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(10px
-    }
-    @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
@@ -163,6 +157,17 @@
       margin-left: 24px;
       transition: margin-left 0.3s ease;
     }
+    /* PayShap QR Styling */
+    #payShapQR {
+      text-align: center;
+      margin-top: 10px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 8px;
+    }
+    #payShapQR canvas {
+      margin: 10px 0;
+    }
   </style>
 </head>
 <body>
@@ -196,18 +201,18 @@
     </select>
     <div style="margin-left: 20px;">
       <label>
-        <option type="checkbox" id="recurring-toggle" />
+        <input type="checkbox" id="recurring-toggle" />
         <span style="font-weight: bold; color: #d97706;">Make this recurring?</span>
       </label>
       <select id="recurring" style="display: none; margin-top: 5px; margin-left: 20px;">
-        <option value="">Select frequency...</option>
+        <option value="">Choose frequency...</option>
         <option value="weekly">Weekly</option>
         <option value="bi-weekly">Bi-weekly</option>
         <option value="monthly">Monthly</option>
       </select>
     </div>
     <textarea id="address" placeholder="🏠 Delivery Address" required autocomplete="street-address"></textarea>
-    <textarea id="notes" placeholder="📝 Example: 'Deliver change for XXX amount' or 'Please deliver at 17h00'" required></textarea>
+    <textarea id="notes" placeholder="📝 Example: 'Bring change for XXX amount' or 'Please deliver at 17h00'" required></textarea>
     <button type="submit" id="submitBtn">Submit Order</button>
   </form>
   <div id="pricing" style="text-align: center; margin-top: 10px;">
@@ -224,6 +229,7 @@
     const submitBtn = document.getElementById("submitBtn");
     const recurringToggle = document.getElementById("recurring-toggle");
     const recurringSelect = document.getElementById("recurring");
+    const paymentSelect = document.getElementById("payment");
 
     // Toggle recurring dropdown
     recurringToggle.addEventListener("change", () => {
@@ -283,16 +289,41 @@
     // Call on load
     window.addEventListener("load", getPricing);
 
-    // Automatically set the address when "Collection" is chosen
+    // Automatically set the address when "Collection" is selected
     deliverySelect.addEventListener("change", () => {
       if (deliverySelect.value === "Collection") {
-        addressInput.value = "No 17 Lucas Street, Ext 9, Eldorado Park 1811";
+        addressInput.value = "No 17 Lucas Str Ext 9 Eldorado park 1811";
         addressInput.readOnly = true;
       } else {
         addressInput.value = "";
         addressInput.readOnly = false;
       }
       getPricing();  // Recalc after change
+    });
+
+    // PayShap QR on Payment Select
+    paymentSelect.addEventListener("change", () => {
+      if (paymentSelect.value === "PayShap") {
+        // Generate QR on payment select (immediate, larger 200x200 for easy scan)
+        const shapId = 'your-phone-number';  // Your cellphone ShapID (e.g., '0821234567')
+        const refNum = 'EGG-' + Date.now().toString().slice(-4);  // Simple ref (e.g., EGG-4567)
+        const amount = document.getElementById("total").textContent.replace(/[^0-9.]/g, '');  // Extract R130 to 130
+        const qrText = 'payShap://pay?shapId=' + shapId + '&amount=' + amount + '&reference=' + refNum;
+        const qrContainer = document.getElementById("payShapQR") || document.createElement('div');
+        qrContainer.id = "payShapQR";
+        qrContainer.innerHTML = '<p style="font-weight: bold; color: #d97706;">Scan to Pay via PayShap:</p>';
+        new QRCode(qrContainer, {
+          text: qrText,
+          width: 200,  // Larger for easy scan
+          height: 200,
+          colorDark: "#000000",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.H
+        });
+        document.body.appendChild(qrContainer);
+      } else if (document.getElementById("payShapQR")) {
+        document.getElementById("payShapQR").remove();  // Hide QR for other payments
+      }
     });
 
     // Stylish submit with animation
@@ -381,4 +412,3 @@
   </script>
 </body>
 </html>
-
