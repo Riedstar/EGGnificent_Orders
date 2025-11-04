@@ -311,7 +311,7 @@
     paymentSelect.addEventListener("change", () => {
       if (paymentSelect.value === "PayShap") {
         // Generate QR on payment select (immediate, larger 200x200 for easy scan)
-        const shapId = 'your-phone-number';  // Your cellphone ShapID (e.g., '0821234567')
+        const shapId = '+27-832000088';  // Your cellphone ShapID (e.g., '0821234567')
         const refNum = 'EGG-' + Date.now().toString().slice(-4);  // Simple ref (e.g., EGG-4567)
         const amount = document.getElementById("total").textContent.replace(/[^0-9.]/g, '');  // Extract R130 to 130
         const qrText = 'payShap://pay?shapId=' + shapId + '&amount=' + amount + '&reference=' + refNum;
@@ -418,3 +418,4 @@
   </script>
 </body>
 </html>
+
