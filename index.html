@@ -23,7 +23,7 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <!-- QR Code for PayShap -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <!-- Stripe for Card Payments -->
   <script src="https://js.stripe.com/v3/"></script>
@@ -198,7 +198,7 @@
       <option value="">💳 Select Payment Method</option>
       <option value="Cash">Cash</option>
       <option value="Card">Card</option>
-      <option value="PayShap">PayShap</option>
+      
     </select>
     <select id="delivery" required>
       <option value="">🚚 Select Delivery Option</option>
@@ -306,9 +306,9 @@
       }
       getPricing();  // Recalc after change
     });
-
+     // Commenting the QR section out its not working
     // PayShap QR on Payment Select
-    paymentSelect.addEventListener("change", () => {
+    paymentSelect.addEventListener("change", () => { -->
       if (paymentSelect.value === "PayShap") {
         // Generate QR on payment select (immediate, larger 200x200 for easy scan)
         const shapId = '+27-832000088';  // Your cellphone ShapID (e.g., '0821234567')
@@ -330,7 +330,7 @@
       } else if (document.getElementById("payShapQR")) {
         document.getElementById("payShapQR").remove();  // Hide QR for other payments
       }
-    });
+    }); --- >
 
     // Stylish submit with animation
     form.addEventListener("submit", (e) => {
@@ -418,4 +418,5 @@
   </script>
 </body>
 </html>
+
 
