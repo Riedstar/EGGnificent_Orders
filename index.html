@@ -301,6 +301,7 @@
         recurring: recurringToggle.checked ? document.getElementById("recurring").value : "one-time",  // Capture recurring
         address: document.getElementById("address").value.trim(),
         notes: document.getElementById("notes").value.trim()
+        console.log('Recurring sent: ' + data.recurring);  // Debug log—check F12 Console after submit
       };
 
       // Calc pricing & set data fields
@@ -374,3 +375,4 @@
   </script>
 </body>
 </html>
+
