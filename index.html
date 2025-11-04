@@ -198,7 +198,7 @@
       <option value="">💳 Select Payment Method</option>
       <option value="Cash">Cash</option>
       <option value="Card">Card</option>
-      
+      <!-- <option value="Card">Payshap</option> --> <!--Commenting out for now since its creating issues in the build -->
     </select>
     <select id="delivery" required>
       <option value="">🚚 Select Delivery Option</option>
@@ -307,7 +307,7 @@
       getPricing();  // Recalc after change
     });
      // Commenting the QR section out its not working
-    // PayShap QR on Payment Select
+    /*/ PayShap QR on Payment Select
     paymentSelect.addEventListener("change", () => { -->
       if (paymentSelect.value === "PayShap") {
         // Generate QR on payment select (immediate, larger 200x200 for easy scan)
@@ -330,7 +330,7 @@
       } else if (document.getElementById("payShapQR")) {
         document.getElementById("payShapQR").remove();  // Hide QR for other payments
       }
-    }); --- >
+    }); */
 
     // Stylish submit with animation
     form.addEventListener("submit", (e) => {
@@ -418,5 +418,6 @@
   </script>
 </body>
 </html>
+
 
 
