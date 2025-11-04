@@ -205,7 +205,7 @@
   </form>
   <div id="pricing" style="text-align: center; margin-top: 10px;">
     <div id="loyalty-status" style="color: #d97706; font-weight: bold;">Loyalty: 0/12 trays to freebie</div>
-    <div id="total" style="color: #333; font-weight: bold;">Total: R0.00</div>
+    <div id="total" color="color: #333; font-weight: bold;">Total: R0.00</div>
   </div>
   <p id="message"></p>
 
@@ -239,7 +239,7 @@
       }
       
       let trays = parseInt(quantity.match(/\d+/)?.[0] || 0);  // Extract number from "2 Trays"
-      let base = trays * 65;  // R65/tray
+      let base = trays * 65;  // R65/tray (no discount for recurring yet)
       let deliveryFee = 0;
       let paymentFee = 0;
       let loyaltyDiscount = 0;
