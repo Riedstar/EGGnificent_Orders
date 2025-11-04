@@ -337,20 +337,21 @@
         document.body.appendChild(van);
         setTimeout(() => van.remove(), 3000);
 
-      // Floating trays animation
-for (let i = 0; i < 5; i++) {
+    // Egg bounce cascade
+for (let i = 0; i < 6; i++) {
   setTimeout(() => {
-    const tray = document.createElement('div');
-    tray.innerHTML = '🥚🥚🥚';  // Tray of eggs
-    tray.style.cssText = 'position: fixed; font-size: 2em; z-index: 1000; left: ' + Math.random() * 100 + 'vw; top: 80vh; animation: floatUp 2s ease-out forwards;';
+    const egg = document.createElement('div');
+    egg.innerHTML = '🥚';
+    egg.style.cssText = 'position: fixed; font-size: 2em; z-index: 1000; left: ' + (50 + (Math.random() - 0.5) * 40) + '%; top: 80vh; animation: bounceUp ' + (1 + Math.random()) + 's ease-out forwards;';
     document.head.insertAdjacentHTML('beforeend', `
       <style>
-        @keyframes floatUp {
-          0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-          100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
-        }
+        @keyframes bounceUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-100vh) scale(0.5); opacity: 0; } }
       </style>
     `);
+    document.body.appendChild(egg);
+    setTimeout(() => egg.remove(), 3000);
+  }, i * 200);  // Staggered for cascade
+}
     document.body.appendRow(tray);
     setTimeout(() => tray.remove(), 2000);
   }, i * 200);  // Staggered start
@@ -383,4 +384,5 @@ for (let i = 0; i < 5; i++) {
   </script>
 </body>
 </html>
+
 
