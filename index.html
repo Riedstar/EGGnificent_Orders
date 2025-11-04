@@ -348,6 +348,20 @@ document.getElementById("message").innerHTML += '<p>Scan to pay via PayShap:</p>
         form.reset();
         addressInput.readOnly = false;
 
+        // PayShap QR for payment (your ShapID)
+const shapId = '0832000088';  // Your cellphone number ShapID (replace with yours, e.g., 0821234567)
+const qr = new QRCode(document.getElementById("message"), {
+  text: 'payShap://pay?shapId=' + shapId + '&amount=' + data.total + '&reference=' + data.refNum,
+  width: 128,
+  height: 128,
+  colorDark: "#000000",
+  colorLight: "#ffffff",
+  correctLevel: QRCode.CorrectLevel.H  // High error correction for scans
+});
+document.getElementById("message").innerHTML += '<p>Scan to pay via PayShap:</p>';
+
+        
+
         // Van animation
         const van = document.createElement('div');
         van.innerHTML = '🚐🥚🥚🥚';  // Van with eggs
@@ -392,4 +406,5 @@ document.getElementById("message").innerHTML += '<p>Scan to pay via PayShap:</p>
   </script>
 </body>
 </html>
+
 
