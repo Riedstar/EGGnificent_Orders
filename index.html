@@ -179,9 +179,13 @@
       <option value="Delivery">Delivery</option>
       <option value="Collection">Collection</option>
     </select>
-    <select id="recurring" required>
-      <option value="">Select Recurring</option>
-      <option value="one-time">One-time</option>
+    <!-- Recurring Order Checkbox + Frequency -->
+    <label>
+      <input type="checkbox" id="recurring-toggle" />
+      <span style="font-weight: bold; color: #d97706;">Make this recurring?</span>
+    </label>
+    <select id="recurring" style="display: none;">
+      <option value="">Choose frequency...</option>
       <option value="weekly">Weekly</option>
       <option value="bi-weekly">Bi-weekly</option>
       <option value="monthly">Monthly</option>
@@ -202,13 +206,21 @@
     const deliverySelect = document.getElementById("delivery");
     const addressInput = document.getElementById("address");
     const submitBtn = document.getElementById("submitBtn");
+    const recurringToggle = document.getElementById("recurring-toggle");
+    const recurringSelect = document.getElementById("recurring");
+
+    // Toggle recurring dropdown
+    recurringToggle.addEventListener("change", () => {
+      recurringSelect.style.display = recurringToggle.checked ? "block" : "none";
+      getPricing();  // Recalc if pricing affects recurring
+    });
 
     // Pricing & Loyalty function (returns calc values for display/submit)
     function getPricing() {
       const quantity = document.getElementById("quantity").value;
       const delivery = document.getElementById("delivery").value;
       const payment = document.getElementById("payment").value;
-      const recurring = document.getElementById("recurring").value;
+      const recurring = recurringToggle.checked ? document.getElementById("recurring").value : "one-time";
       const address = document.getElementById("address").value.toLowerCase();  // For suburb check
       
       if (!quantity || !payment || !delivery) {
@@ -224,6 +236,12 @@
       let loyaltyDiscount = 0;
       let loyaltyStatus = "Loyalty: 0/12 trays to freebie";
       
+      // Optional recurring discount (e.g., 5% off for monthly)
+      if (recurring === "monthly") {
+        loyaltyDiscount = base * 0.05;  // 5% off for monthly
+        loyaltyStatus = "Loyalty: 5% monthly discount applied!";
+      }
+      
       if (delivery === "Delivery" && (
         address.includes("eldorado park") || address.includes("eldos") ||
         address.includes("klipspruit west") || address.includes("klipspruit")
@@ -234,7 +252,7 @@
       }
       
       let total = base + deliveryFee + paymentFee - loyaltyDiscount;
-      document.getElementById("total").textContent = `Total: R${total.toFixed(2)}`;
+      document.getElementById("total").textContent = `Total: R${total.toFixed(2)} (${recurring})`;
       
       return {
         total: total,
@@ -249,7 +267,7 @@
     document.getElementById("quantity").addEventListener("change", getPricing);
     document.getElementById("delivery").addEventListener("change", getPricing);
     document.getElementById("payment").addEventListener("change", getPricing);
-    document.getElementById("recurring").addEventListener("change", getPricing);  // New: Recurring change triggers recalc (if pricing affects)
+    document.getElementById("recurring").addEventListener("change", getPricing);
     document.getElementById("address").addEventListener("blur", getPricing);
 
     // Call on load
@@ -277,7 +295,7 @@
         quantity: document.getElementById("quantity").value,
         payment: document.getElementById("payment").value,
         delivery: document.getElementById("delivery").value,
-        recurring: document.getElementById("recurring").value,  // New: Recurring frequency
+        recurring: recurringToggle.checked ? document.getElementById("recurring").value : "one-time",  // New: Capture recurring
         address: document.getElementById("address").value.trim(),
         notes: document.getElementById("notes").value.trim()
       };
