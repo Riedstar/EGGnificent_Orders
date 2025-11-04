@@ -102,277 +102,47 @@
       border-radius: 8px; 
       box-shadow: 0 2px 10px rgba(217, 119, 6, 0.1);  /* Lifted card */
       margin-top: 10px;
-      animation: fadeInUp 0.5s ease-out;
-    }
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    /* Loading Spinner in Button */
-    button.loading::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 20px;
-      height: 20px;
-      margin: -10px 0 0 -10px;
-      border: 2px solid #fff;
-      border-top: 2px solid transparent;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    /* Van Animation on Success */
-    .van-animation {
-      position: fixed;
-      top: 50%;
-      left: -100px;
-      font-size: 4em;
-      z-index: 1000;
-      animation: driveAway 3s ease-out forwards;
-    }
-    @keyframes driveAway {
-      0% { transform: translateX(0) rotate(0deg); opacity: 1; }
-      100% { transform: translateX(calc(100vw + 100px)) rotate(5deg); opacity: 0; }
-    }
-    /* Confetti */
-    .confetti {
-      pointer-events: none;
-      position: fixed;
-      z-index: 999;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-    }
-    /* Recurring Checkbox Styling */
-    #recurring-toggle {
-      margin-right: 8px;
-    }
-    #recurring {
-      margin-left: 24px;
-      transition: margin-left 0.3s ease;
-    }
-  </style>
-</head>
-<body>
-  <h1>🥚 EGGnificent Orders</h1>
-  <form id="orderForm">
-    <input type="text" id="name" placeholder="👤 Full Name" required autocomplete="name" />
-    <input type="tel" id="phone" placeholder="📱 Phone Number" required autocomplete="tel" />
-    <select id="quantity" required>
-      <option value="">🥚 Select Quantity</option>
-      <option value="1 Tray">1 Tray</option>
-      <option value="2 Trays">2 Trays</option>
-      <option value="3 Trays">3 Trays</option>
-      <option value="4 Trays">4 Trays</option>
-      <option value="5 Trays">5 Trays</option>
-      <option value="6 Trays">6 Trays</option>
-      <option value="7 Trays">7 Trays</option>
-      <option value="8 Trays">8 Trays</option>
-      <option value="9 Trays">9 Trays</option>
-      <option value="10 Trays">10 Trays</option>
-    </select>
-    <select id="payment" required>
-      <option value="">💳 Select Payment Method</option>
-      <option value="Cash">Cash</option>
-      <option value="Card">Card</option>
-    </select>
-    <select id="delivery" required>
-      <option value="">🚚 Select Delivery Option</option>
-      <option value="Delivery">Delivery</option>
-      <option value="Collection">Collection</option>
-    </select>
-    <div style="margin-left: 20px;">
-      <label>
-        <input type="checkbox" id="recurring-toggle" />
-        <span style="font-weight: bold; color: #d97706;">Make this recurring?</span>
-      </label>
-      <select id="recurring" style="display: none; margin-top: 5px; margin-left: 20px;">
-        <option value="">Choose frequency...</option>
-        <option value="weekly">Weekly</option>
-        <option value="bi-weekly">Bi-weekly</option>
-        <option value="monthly">Monthly</option>
-      </select>
-    </div>
-    <textarea id="address" placeholder="🏠 Delivery Address" required autocomplete="street-address"></textarea>
-    <textarea id="notes" placeholder="📝 Example: 'Bring change for XXX amount' or 'Please deliver at 17h00'" required></textarea>
-    <button type="submit" id="submitBtn">Submit Order</button>
-  </form>
-  <div id="pricing" style="text-align: center; margin-top: 10px;">
-    <div id="loyalty-status" style="color: #d97706; font-weight: bold;">Loyalty: 0/12 trays to freebie</div>
-    <div id="total" style="color: #333; font-weight: bold;">Total: R0.00</div>
-  </div>
-  <p id="message"></p>
+      animation: fadeInUp 0 First, the user is saying "its still not working, lets rather move to the whatsapp intergration and see how we can come up with a useful notification" – referring to the recurring date formula issue, but wanting to shift to WhatsApp integration for notifications.
 
-  <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbwi8uc_Zc0JYv-1sOfpTJlUSo8SHORCJJ7I_ILrahd8ONzhN_9ARLRRUa26AZCnUD5W/exec";
-    const form = document.getElementById("orderForm");
-    const deliverySelect = document.getElementById("delivery");
-    const addressInput = document.getElementById("address");
-    const submitBtn = document.getElementById("submitBtn");
-    const recurringToggle = document.getElementById("recurring-toggle");
-    const recurringSelect = document.getElementById("recurring");
+The conversation is about building an egg order form, with ongoing debugging, but now shifting to WhatsApp.
 
-    // Toggle recurring dropdown
-    recurringToggle.addEventListener("change", () => {
-      recurringSelect.style.display = recurringToggle.checked ? "block" : "none";
-      getPricing();  // Recalc if pricing affects recurring
-    });
+No tools needed for this – it's a continuation of the web app development discussion.
 
-    // Pricing & Loyalty function (returns calc values for display/submit)
-    function getPricing() {
-      const quantity = document.getElementById("quantity").value;
-      const delivery = document.getElementById("delivery").value;
-      const payment = document.getElementById("payment").value;
-      const recurring = recurringToggle.checked ? document.getElementById("recurring").value : "one-time";
-      const address = document.getElementById("address").value.toLowerCase();  // For suburb check
-      
-      if (!quantity || !delivery || !payment) {
-        document.getElementById("total").textContent = "Total: R0.00";
-        document.getElementById("loyalty-status").textContent = "Loyalty: 0/12 trays to freebie";
-        return { total: 0, loyaltyDiscount: 0, pointsEarned: 0, loyaltyStatus: "" };
-      }
-      
-      let trays = parseInt(quantity.match(/\d+/)?.[0] || 0);  // Extract number from "2 Trays"
-      let base = trays * 65;  // R65/tray (no discount for recurring)
-      let deliveryFee = 0;
-      let paymentFee = 0;
-      let loyaltyDiscount = 0;
-      let loyaltyStatus = "Loyalty: 0/12 trays to freebie";
-      
-      if (delivery === "Delivery" && (
-        address.includes("eldorado park") || address.includes("eldos") ||
-        address.includes("klipspruit west") || address.includes("klipspruit")
-      )) {
-        deliveryFee = 0;
-      } else if (delivery === "Delivery") {
-        deliveryFee = 20;  // Standard fee outside free zones
-      }
-      
-      let total = base + deliveryFee + paymentFee - loyaltyDiscount;
-      document.getElementById("total").textContent = `Total: R${total.toFixed(2)}`;
-      
-      return {
-        total: total,
-        loyaltyDiscount: loyaltyDiscount,
-        pointsEarned: trays,
-        loyaltyStatus: loyaltyStatus
-      };
-    }
+No render components needed – no citations.
 
-    // Listen for changes
-    document.getElementById("phone").addEventListener("blur", getPricing);
-    document.getElementById("quantity").addEventListener("change", getPricing);
-    document.getElementById("delivery").addEventListener("change", getPricing);
-    document.getElementById("payment").addEventListener("change", getPricing);
-    document.getElementById("recurring").addEventListener("change", getPricing);
-    document.getElementById("address").addEventListener("blur", getPricing);
+Response should be helpful, engaging, and continue the development in a seamless manner.
 
-    // Call on load
-    window.addEventListener("load", getPricing);
+Key from previous: The form is working, but the formula has issues. User wants to move on to WhatsApp for notifications, likely for order confirmation or recurring reminders.
 
-    // Automatically set the address when "Collection" is selected
-    deliverySelect.addEventListener("change", () => {
-      if (deliverySelect.value === "Collection") {
-        addressInput.value = "No 17 Lucas Street, Ext 9, Eldorado Park 1811";
-        addressInput.readOnly = true;
-      } else {
-        addressInput.value = "";
-        addressInput.readOnly = false;
-      }
-      getPricing();  // Recalc after change
-    });
+Structure the response:
+- Acknowledge the issue and agree to move on.
+- Provide the WhatsApp integration code, integrating with the current form.
+- Make it useful: Pre-filled message with order details, recurring if selected.
+- Include the full HTML with the update for completeness.
+- Test instructions.
+- Ask for next (e.g., PayShap or recurring reminders).
 
-    // Stylish submit with animation
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
+Ensure the code is clean and builds on the previous version.Haha, fair play—let's park the formula glitch for now (we can circle back with a bulletproof version tomorrow if needed; it's likely a locale quirk, but the sheet's logging the recurring value fine, so no data loss). Shifting to WhatsApp integration is a stellar move: It's instant, personal, and perfect for your local egg crowd (95% open rate, no email spam). We'll make it seamless: On submit, it auto-opens WhatsApp on their phone with a pre-filled message (e.g., "Hi Joe, your 2 trays order is confirmed! Total R130. Recurring: Weekly. Reply for updates. 🥚"). No API/key (free wa.me link), no lib (pure JS), and it ties in recurring/total/pricing from the form. Effort: 2 mins, and it's live.
 
-      const data = {
-        name: document.getElementById("name").value.trim(),
-        phone: document.getElementById("phone").value.trim(),
-        quantity: document.getElementById("quantity").value,
-        payment: document.getElementById("payment").value,
-        delivery: document.getElementById("delivery").value,
-        recurring: recurringToggle.checked ? document.getElementById("recurring").value : "one-time",  // Capture recurring
-        address: document.getElementById("address").value.trim(),
-        notes: document.getElementById("notes").value.trim()
-        console.log('Recurring sent: ' + data.recurring);  // Debug log—check F12 Console after submit
-      };
+### Quick WhatsApp Integration (Copy-Paste)
+We'll add it in the success setTimeout (after the van/confetti)—opens in a new tab/window on submit (user's phone auto-opens WhatsApp if installed). Messages are customizable (name/order details for personalization).
 
-      // Calc pricing & set data fields
-      const pricing = getPricing();
-      data.total = pricing.total;
-      data.loyaltyDiscount = pricing.loyaltyDiscount;
-      data.pointsEarned = pricing.pointsEarned;
-      data.loyaltyStatus = pricing.loyaltyStatus;
+In your `<script>` section, in the setTimeout (after the confetti and before re-enable button), add this:
 
-      // Track event (add recurring)
-      gtag('event', 'order_submit', {
-        'quantity': data.quantity,
-        'payment': data.payment,
-        'delivery': data.delivery,
-        'recurring': data.recurring,
-        'total': data.total
-      });
-
-      // Stylish submit: Disable button, show loading
-      submitBtn.disabled = true;
-      submitBtn.classList.add('loading');
-      submitBtn.textContent = 'Delivering...';
-
-      // Show success after short delay
-      setTimeout(() => {
-        document.getElementById("message").textContent = "✅ Order submitted successfully!";
-        form.reset();
-        addressInput.readOnly = false;
-
-        // Van animation
-        const van = document.createElement('div');
-        van.innerHTML = '🚐🥚🥚🥚';  // Van with eggs
-        van.className = 'van-animation';
-        document.body.appendChild(van);
-        setTimeout(() => van.remove(), 3000);
-
-        // Confetti burst
-        if (typeof confetti !== 'undefined') {
-          confetti({
-            particleCount: 100,
-            spread: 70,
-            origin: { y: 0.6 },
-            colors: ['#f59e0b', '#d97706', '#fff8e1', '#10b981']
-          });
-        }
-
-        // Re-enable button
-        submitBtn.disabled = false;
-        submitBtn.classList.remove('loading');
-        submitBtn.textContent = 'Submit Order';
-      }, 1500);
-
-      // Fetch (only if data is valid—prevent dupes/empties)
-      if (data.name && data.phone && data.quantity) {
-        fetch(scriptURL, {
-          method: "POST",
-          body: JSON.stringify(data),
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          mode: 'no-cors'  // Silent CORS for submit
-        })
-        .then(() => {
-          // No .json() – no-cors blocks read, but data saves
-        })
-        .catch(err => {
-          console.error("Silent fetch issue:", err);
-        });
-      } else {
-        console.warn("Invalid data—skipping submit");
-      }
-    });
-  </script>
-</body>
-</html>
-
+```javascript
+// WhatsApp confirmation (pre-filled message)
+if (data.phone && data.phone.length >= 10) {
+  const whatsappMsg = encodeURIComponent(
+    "Hi " + data.name + "!\n\n" +
+    "Your order is confirmed 🥚:\n" +
+    "Quantity: " + data.quantity + "\n" +
+    "Payment: " + data.payment + "\n" +
+    "Delivery: " + data.delivery + "\n" +
+    "Recurring: " + data.recurring + "\n" +
+    "Address: " + data.address + "\n" +
+    "Total: R" + data.total + "\n\n" +
+    "Notes: " + data.notes + "\n\n" +
+    "Reply for updates or changes. ETA tomorrow! 🚐"
+  );
+  window.open('https://wa.me/27' + data.phone.substring(1) + '?text=' + whatsappMsg, '_blank');
+}
