@@ -80,4 +80,297 @@
     }
     button:hover { 
       transform: translateY(-2px);  /* Lift on hover */
-      box-shadow: 0 4px 12px rgba(245, 158, 11
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);  /* Orange shadow */
+    }
+    button:active { 
+      transform: translateY(0);  /* Press down */
+    }
+    #message { 
+      text-align: center; 
+      font-weight: bold; 
+      margin-top: 10px; 
+      transition: opacity 0.3s ease, transform 0.3s ease;  /* Smooth show */
+    }
+    #message[style*="✅"] {
+      opacity: 1;
+      transform: scale(1.05);
+      color: #10b981;  /* Green for success */
+    }
+    #pricing { 
+      background: rgba(255, 255, 255, 0.9);  /* Card for total/loyalty */
+      padding: 12px; 
+      border-radius: 8px; 
+      box-shadow: 0 2px 10px rgba(217, 119, 6, 0.1);  /* Lifted card */
+      margin-top: 10px;
+      animation: fadeInUp 0.5s ease-out;
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    /* Loading Spinner in Button */
+    button.loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      margin: -10px 0 0 -10px;
+      border: 2px solid #fff;
+      border-top: 2px solid transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    /* Van Animation on Success */
+    .van-animation {
+      position: fixed;
+      top: 50%;
+      left: -100px;
+      font-size: 4em;
+      z-index: 1000;
+      animation: driveAway 3s ease-out forwards;
+    }
+    @keyframes driveAway {
+      0% { transform: translateX(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateX(calc(100vw + 100px)) rotate(5deg); opacity: 0; }
+    }
+    /* Confetti */
+    .confetti {
+      pointer-events: none;
+      position: fixed;
+      z-index: 999;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+    }
+    /* Recurring Checkbox Styling */
+    #recurring-toggle {
+      margin-right: 8px;
+    }
+    #recurring {
+      margin-left: 24px;
+      transition: margin-left 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+  <h1>🥚 EGGnificent Orders</h1>
+  <form id="orderForm">
+    <input type="text" id="name" placeholder="👤 Full Name" required autocomplete="name" />
+    <input type="tel" id="phone" placeholder="📱 Phone Number" required autocomplete="tel" />
+    <select id="quantity" required>
+      <option value="">🥚 Select Quantity</option>
+      <option value="1 Tray">1 Tray</option>
+      <option value="2 Trays">2 Trays</option>
+      <option value="3 Trays">3 Trays</option>
+      <option value="4 Trays">4 Trays</option>
+      <option value="5 Trays">5 Trays</option>
+      <option value="6 Trays">6 Trays</option>
+      <option value="7 Trays">7 Trays</option>
+      <option value="8 Trays">8 Trays</option>
+      <option value="9 Trays">9 Trays</option>
+      <option value="10 Trays">10 Trays</option>
+    </select>
+    <select id="payment" required>
+      <option value="">💳 Select Payment Method</option>
+      <option value="Cash">Cash</option>
+      <option value="Card">Card</option>
+    </select>
+    <select id="delivery" required>
+      <option value="">🚚 Select Delivery Option</option>
+      <option value="Delivery">Delivery</option>
+      <option value="Collection">Collection</option>
+    </select>
+    <div style="margin-left: 20px;">
+      <label>
+        <input type="checkbox" id="recurring-toggle" />
+        <span style="font-weight: bold; color: #d97706;">Make this recurring?</span>
+      </label>
+      <select id="recurring" style="display: none; margin-top: 5px; margin-left: 20px;">
+        <option value="">Choose frequency...</option>
+        <option value="weekly">Weekly</option>
+        <option value="bi-weekly">Bi-weekly</option>
+        <option value="monthly">Monthly</option>
+      </select>
+    </div>
+    <textarea id="address" placeholder="🏠 Delivery Address" required autocomplete="street-address"></textarea>
+    <textarea id="notes" placeholder="📝 Example: 'Bring change for XXX amount' or 'Please deliver at 17h00'" required></textarea>
+    <button type="submit" id="submitBtn">Submit Order</button>
+  </form>
+  <div id="pricing" style="text-align: center; margin-top: 10px;">
+    <div id="loyalty-status" style="color: #d97706; font-weight: bold;">Loyalty: 0/12 trays to freebie</div>
+    <div id="total" style="color: #333; font-weight: bold;">Total: R0.00</div>
+  </div>
+  <p id="message"></p>
+
+  <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbwi8uc_Zc0JYv-1sOfpTJlUSo8SHORCJJ7I_ILrahd8ONzhN_9ARLRRUa26AZCnUD5W/exec";
+    const form = document.getElementById("orderForm");
+    const deliverySelect = document.getElementById("delivery");
+    const addressInput = document.getElementById("address");
+    const submitBtn = document.getElementById("submitBtn");
+    const recurringToggle = document.getElementById("recurring-toggle");
+    const recurringSelect = document.getElementById("recurring");
+
+    // Toggle recurring dropdown
+    recurringToggle.addEventListener("change", () => {
+      recurringSelect.style.display = recurringToggle.checked ? "block" : "none";
+      getPricing();  // Recalc if pricing affects recurring
+    });
+
+    // Pricing & Loyalty function (returns calc values for display/submit)
+    function getPricing() {
+      const quantity = document.getElementById("quantity").value;
+      const delivery = document.getElementById("delivery").value;
+      const payment = document.getElementById("payment").value;
+      const recurring = recurringToggle.checked ? document.getElementById("recurring").value : "one-time";
+      const address = document.getElementById("address").value.toLowerCase();  // For suburb check
+      
+      if (!quantity || !delivery || !payment) {
+        document.getElementById("total").textContent = "Total: R0.00";
+        document.getElementById("loyalty-status").textContent = "Loyalty: 0/12 trays to freebie";
+        return { total: 0, loyaltyDiscount: 0, pointsEarned: 0, loyaltyStatus: "" };
+      }
+      
+      let trays = parseInt(quantity.match(/\d+/)?.[0] || 0);  // Extract number from "2 Trays"
+      let base = trays * 65;  // R65/tray (no discount for recurring)
+      let deliveryFee = 0;
+      let paymentFee = 0;
+      let loyaltyDiscount = 0;
+      let loyaltyStatus = "Loyalty: 0/12 trays to freebie";
+      
+      if (delivery === "Delivery" && (
+        address.includes("eldorado park") || address.includes("eldos") ||
+        address.includes("klipspruit west") || address.includes("klipspruit")
+      )) {
+        deliveryFee = 0;
+      } else if (delivery === "Delivery") {
+        deliveryFee = 20;  // Standard fee outside free zones
+      }
+      
+      let total = base + deliveryFee + paymentFee - loyaltyDiscount;
+      document.getElementById("total").textContent = `Total: R${total.toFixed(2)}`;
+      
+      return {
+        total: total,
+        loyaltyDiscount: loyaltyDiscount,
+        pointsEarned: trays,
+        loyaltyStatus: loyaltyStatus
+      };
+    }
+
+    // Listen for changes
+    document.getElementById("phone").addEventListener("blur", getPricing);
+    document.getElementById("quantity").addEventListener("change", getPricing);
+    document.getElementById("delivery").addEventListener("change", getPricing);
+    document.getElementById("payment").addEventListener("change", getPricing);
+    document.getElementById("recurring").addEventListener("change", getPricing);
+    document.getElementById("address").addEventListener("blur", getPricing);
+
+    // Call on load
+    window.addEventListener("load", getPricing);
+
+    // Automatically set the address when "Collection" is selected
+    deliverySelect.addEventListener("change", () => {
+      if (deliverySelect.value === "Collection") {
+        addressInput.value = "No 17 Lucas Street, Ext 9, Eldorado Park 1811";
+        addressInput.readOnly = true;
+      } else {
+        addressInput.value = "";
+        addressInput.readOnly = false;
+      }
+      getPricing();  // Recalc after change
+    });
+
+    // Stylish submit with animation
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const data = {
+        name: document.getElementById("name").value.trim(),
+        phone: document.getElementById("phone").value.trim(),
+        quantity: document.getElementById("quantity").value,
+        payment: document.getElementById("payment").value,
+        delivery: document.getElementById("delivery").value,
+        recurring: recurringToggle.checked ? document.getElementById("recurring").value : "one-time",  // Capture recurring
+        address: document.getElementById("address").value.trim(),
+        notes: document.getElementById("notes").value.trim()
+      };
+
+      // Calc pricing & set data fields
+      const pricing = getPricing();
+      data.total = pricing.total;
+      data.loyaltyDiscount = pricing.loyaltyDiscount;
+      data.pointsEarned = pricing.pointsEarned;
+      data.loyaltyStatus = pricing.loyaltyStatus;
+
+      // Track event (add recurring)
+      gtag('event', 'order_submit', {
+        'quantity': data.quantity,
+        'payment': data.payment,
+        'delivery': data.delivery,
+        'recurring': data.recurring,
+        'total': data.total
+      });
+
+      // Stylish submit: Disable button, show loading
+      submitBtn.disabled = true;
+      submitBtn.classList.add('loading');
+      submitBtn.textContent = 'Delivering...';
+
+      // Show success after short delay
+      setTimeout(() => {
+        document.getElementById("message").textContent = "✅ Order submitted successfully!";
+        form.reset();
+        addressInput.readOnly = false;
+
+        // Van animation
+        const van = document.createElement('div');
+        van.innerHTML = '🚐🥚🥚🥚';  // Van with eggs
+        van.className = 'van-animation';
+        document.body.appendChild(van);
+        setTimeout(() => van.remove(), 3000);
+
+        // Confetti burst
+        if (typeof confetti !== 'undefined') {
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: ['#f59e0b', '#d97706', '#fff8e1', '#10b981']
+          });
+        }
+
+        // Re-enable button
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('loading');
+        submitBtn.textContent = 'Submit Order';
+      }, 1500);
+
+      // Fetch (only if data is valid—prevent dupes/empties)
+      if (data.name && data.phone && data.quantity) {
+        fetch(scriptURL, {
+          method: "POST",
+          body: JSON.stringify(data),
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          mode: 'no-cors'  // Silent CORS for submit
+        })
+        .then(() => {
+          // No .json() – no-cors blocks read, but data saves
+        })
+        .catch(err => {
+          console.error("Silent fetch issue:", err);
+        });
+      } else {
+        console.warn("Invalid data—skipping submit");
+      }
+    });
+  </script>
+</body>
+</html>
