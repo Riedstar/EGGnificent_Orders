@@ -117,10 +117,10 @@
       width: 20px;
       height: 20px;
       margin: -10px 0 0 -10px;
-      border: 2px solid transparent;
-      border-top: 2px solid white;
+      border: 2px solid #fff;
+      border-top: 2px solid transparent;
       border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+      animation: spin 1s linear infinite;
     }
     @keyframes spin {
       0% { transform: rotate(0deg); }
@@ -129,27 +129,25 @@
     /* Van Animation on Success */
     .van-animation {
       position: fixed;
-      bottom: 20px;
+      top: 50%;
       left: -100px;
-      font-size: 3em;
+      font-size: 4em;
       z-index: 1000;
-      animation: driveAway 2s ease-out forwards;
+      animation: driveAway 3s ease-out forwards;
     }
     @keyframes driveAway {
-      0% { transform: translateX(0); opacity: 0; }
-      10% { opacity: 1; }
-      90% { opacity: 1; }
-      100% { transform: translateX(100vw); opacity: 0; }
+      0% { transform: translateX(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateX(calc(100vw + 100px)) rotate(5deg); opacity: 0; }
     }
-    /* Confetti on Success */
+    /* Confetti */
     .confetti {
       pointer-events: none;
       position: fixed;
       z-index: 999;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 100%;
+      width: 100vw;
+      height: 100vh;
     }
   </style>
 </head>
@@ -181,6 +179,13 @@
       <option value="Delivery">Delivery</option>
       <option value="Collection">Collection</option>
     </select>
+    <select id="recurring" required>
+      <option value="">Select Recurring</option>
+      <option value="one-time">One-time</option>
+      <option value="weekly">Weekly</option>
+      <option value="bi-weekly">Bi-weekly</option>
+      <option value="monthly">Monthly</option>
+    </select>
     <textarea id="address" placeholder="🏠 Delivery Address" required autocomplete="street-address"></textarea>
     <textarea id="notes" placeholder="📝 Example: 'Bring change for XXX amount' or 'Please deliver at 17h00'" required></textarea>
     <button type="submit" id="submitBtn">Submit Order</button>
@@ -203,6 +208,7 @@
       const quantity = document.getElementById("quantity").value;
       const delivery = document.getElementById("delivery").value;
       const payment = document.getElementById("payment").value;
+      const recurring = document.getElementById("recurring").value;
       const address = document.getElementById("address").value.toLowerCase();  // For suburb check
       
       if (!quantity || !payment || !delivery) {
@@ -243,6 +249,7 @@
     document.getElementById("quantity").addEventListener("change", getPricing);
     document.getElementById("delivery").addEventListener("change", getPricing);
     document.getElementById("payment").addEventListener("change", getPricing);
+    document.getElementById("recurring").addEventListener("change", getPricing);  // New: Recurring change triggers recalc (if pricing affects)
     document.getElementById("address").addEventListener("blur", getPricing);
 
     // Call on load
@@ -270,6 +277,7 @@
         quantity: document.getElementById("quantity").value,
         payment: document.getElementById("payment").value,
         delivery: document.getElementById("delivery").value,
+        recurring: document.getElementById("recurring").value,  // New: Recurring frequency
         address: document.getElementById("address").value.trim(),
         notes: document.getElementById("notes").value.trim()
       };
@@ -281,11 +289,12 @@
       data.pointsEarned = pricing.pointsEarned;
       data.loyaltyStatus = pricing.loyaltyStatus;
 
-      // Track event
+      // Track event (add recurring)
       gtag('event', 'order_submit', {
         'quantity': data.quantity,
         'payment': data.payment,
         'delivery': data.delivery,
+        'recurring': data.recurring,  // New: Track frequency
         'total': data.total
       });
 
@@ -323,15 +332,22 @@
         submitBtn.textContent = 'Submit Order';
       }, 1500);
 
-      // Fetch (silent)
+      // Fetch (only if data is valid—prevent dupes/empties)
       if (data.name && data.phone && data.quantity) {
         fetch(scriptURL, {
           method: "POST",
           body: JSON.stringify(data),
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          mode: 'no-cors'
+          mode: 'no-cors'  // Silent CORS for submit
         })
-        .catch(err => console.error("Silent fetch issue:", err));
+        .then(() => {
+          // No .json() – no-cors blocks read, but data saves
+        })
+        .catch(err => {
+          console.error("Silent fetch issue:", err);
+        });
+      } else {
+        console.warn("Invalid data—skipping submit");
       }
     });
   </script>
