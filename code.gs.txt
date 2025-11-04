@@ -1,0 +1,192 @@
+// Simple GET to test the Web App
+function doGet(e) {
+  return HtmlService.createHtmlOutput("✅ EGGnificent Web App is running...");
+}
+
+// Handle POST requests
+function doPost(e) {
+  return handleRequest(e);
+}
+
+// Handle CORS preflight OPTIONS requests
+function doOptions(e) {
+  return handleRequest(e);
+}
+
+// New function: Update loyalty tab on submit
+function updateLoyaltyTab(phone, traysAdded, discountApplied) {
+  console.log("Updating loyalty for phone: " + phone + ", trays: " + traysAdded + ", discount: " + discountApplied);
+  var ss = SpreadsheetApp.openById("1k450sMr5se8oQ-9e5Y9bPKxUKk8if3MZ54s0ZXfv5zI");
+  var loyaltySheet = ss.getSheetByName("Loyalty");
+  
+  if (!loyaltySheet) {
+    loyaltySheet = ss.insertSheet("Loyalty");
+    loyaltySheet.getRange("A1:F1").setValues([["Phone", "Total Trays", "Freebies Earned", "Freebies Redeemed", "Next Freebie At", "Last Order Date"]]);
+    console.log("Created new Loyalty sheet");
+  }
+  
+  var dataRange = loyaltySheet.getDataRange();
+  var values = dataRange.getValues();
+  var rowIndex = -1;
+  
+  // Find or add row for this phone
+  for (var i = 1; i < values.length; i++) {  // Skip header
+    if (values[i][0] === phone) {
+      rowIndex = i + 1;  // Sheet row (1-based)
+      break;
+    }
+  }
+  
+  var today = new Date();
+  if (rowIndex === -1) {
+    // New customer
+    loyaltySheet.appendRow([phone, traysAdded, 0, 0, 12, today]);
+    console.log("Added new loyalty row for " + phone);
+  } else {
+    // Update existing
+    var currentTrays = loyaltySheet.getRange(rowIndex, 2).getValue();  // Column B
+    var newTrays = currentTrays + traysAdded;
+    var freebiesEarned = Math.floor(newTrays / 13);
+    var freebiesRedeemed = loyaltySheet.getRange(rowIndex, 4).getValue();  // Column D
+    var nextFreebie = 13 - (newTrays % 13);
+    
+    loyaltySheet.getRange(rowIndex, 2).setValue(newTrays);
+    loyaltySheet.getRange(rowIndex, 3).setValue(freebiesEarned);
+    loyaltySheet.getRange(rowIndex, 6).setValue(today);  // Last order
+    console.log("Updated loyalty row " + rowIndex + " for " + phone + " to " + newTrays + " trays");
+  }
+  
+  if (discountApplied > 0) {
+    // Redeem freebie
+    var redeemed = loyaltySheet.getRange(rowIndex || values.length + 1, 4).getValue() + 1;
+    loyaltySheet.getRange(rowIndex || values.length + 1, 4).setValue(redeemed);
+    console.log("Redeemed freebie for " + phone);
+  }
+}
+
+// Unified handler for POST & OPTIONS
+function handleRequest(e) {
+  const corsHeaders = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type"
+  };
+
+  try {
+    console.log("handleRequest started");
+    // OPTIONS preflight request (empty response with headers)
+    if (!e || !e.postData || !e.postData.contents) {
+      console.log("OPTIONS preflight - returning empty");
+      return ContentService
+        .createTextOutput(JSON.stringify({}))
+        .setMimeType(ContentService.MimeType.JSON)
+        .setHeaders(corsHeaders);
+    }
+
+    // Parse the POST data (handles text/plain JSON string)
+    console.log("Parsing POST data");
+    var data = JSON.parse(e.postData.contents);
+    console.log("Parsed data keys: " + Object.keys(data).join(", "));
+
+    // Handle loyalty query (for JS fetch)
+    if (data.action === 'getLoyalty') {
+      console.log("Loyalty query for phone: " + data.phone);
+      var sheet = SpreadsheetApp.openById("1k450sMr5se8oQ-9e5Y9bPKxUKk8if3MZ54s0ZXfv5zI").getActiveSheet();
+      var pastOrders = sheet.getDataRange().getValues().filter(row => row[2] === data.phone);  // Column C = phone
+      var pastTrays = pastOrders.reduce((sum, row) => sum + parseInt(row[3].match(/\d+/)?.[0] || 0), 0);  // Sum past quantities (Column D)
+      console.log("Past trays for " + data.phone + ": " + pastTrays);
+      return ContentService
+        .createTextOutput(JSON.stringify({ pastTrays: pastTrays }))
+        .setMimeType(ContentService.MimeType.JSON)
+        .setHeaders(corsHeaders);
+    }
+
+    // Determine address
+    var address = data.delivery === "Collection"
+      ? "No 17 Lucas Street Ext 9 Eldorado Park 1811"
+      : (data.address || "");
+    console.log("Address: " + address);
+
+    // Open sheet
+    console.log("Opening sheet");
+    var sheet = SpreadsheetApp.openById("1k450sMr5se8oQ-9e5Y9bPKxUKk8if3MZ54s0ZXfv5zI").getActiveSheet();
+    console.log("Sheet name: " + sheet.getName() + ", last row: " + sheet.getLastRow());
+
+    // Loyalty logic
+    var loyaltyStatus = "Loyalty: 0/12 trays to freebie";
+    data.loyaltyDiscount = 0;
+    if (data.phone) {
+      console.log("Running loyalty logic for " + data.phone);
+      var pastOrders = sheet.getDataRange().getValues().filter(row => row[2] === data.phone);
+      var totalPastTrays = pastOrders.reduce((sum, row) => sum + parseInt(row[3].match(/\d+/)?.[0] || 0), 0);
+      var loyaltyPoints = totalPastTrays + parseInt(data.quantity.match(/\d+/)?.[0] || 0);
+      var freebiesEarned = Math.floor(loyaltyPoints / 13);
+      loyaltyStatus = `Total trays: ${loyaltyPoints} | Freebies earned: ${freebiesEarned}`;
+      if (freebiesEarned > 0) {
+        data.loyaltyDiscount = 65;
+      }
+      console.log("Loyalty status: " + loyaltyStatus + ", discount: " + data.loyaltyDiscount);
+    }
+
+    // Safeguard data fields (prevent blanks in sheet/email)
+      data.name = data.name || "";
+      data.phone = data.phone || "";
+      data.quantity = data.quantity || "";
+      data.payment = data.payment || "";
+      data.delivery = data.delivery || "";
+      data.address = data.address || "";
+      data.notes = data.notes || "";
+      data.total = data.total || 0;
+
+      console.log("Safeguarded data: Name=" + data.name + ", Total=" + data.total);
+
+      // Robust append: Get last row and set values (bypasses filter/hidden row issues)
+      var lastRow = sheet.getLastRow();
+      if (lastRow < 1) lastRow = 1;  // Skip header if empty
+      sheet.getRange(lastRow + 1, 1, 1, 9).setValues([[new Date(), data.name, data.phone, data.quantity, data.payment, data.delivery, address, data.notes, data.total]]);
+      console.log("Added to row: " + (lastRow + 1) + " - last row now: " + sheet.getLastRow());
+
+    // Update loyalty tab
+    updateLoyaltyTab(data.phone, parseInt(data.quantity.match(/\d+/)?.[0] || 0), data.loyaltyDiscount);
+
+    // Send email notifications (to you + customer if provided)
+var recipients = ["mraigen@gmail.com", "riedster@icloud.com"];
+if (data.customerEmail) {
+  recipients.push(data.customerEmail);
+}
+var subject = "New EGGnificent Order Received!" + (data.recurring !== "one-time" ? " (" + data.recurring + ")" : "");
+var body = "New order details:\n\n" +
+           "Name: " + data.name + "\n" +
+           "Phone: " + data.phone + "\n" +
+           "Quantity: " + data.quantity + "\n" +
+           "Payment: " + data.payment + "\n" +
+           "Delivery Type: " + data.delivery + "\n" +
+           "Recurring: " + data.recurring + "\n" +  // New: Recurring option
+           "Address: " + address + "\n" +
+           "Notes: " + data.notes + "\n" +
+           "Total: R" + data.total + "\n" +
+           "Loyalty: " + loyaltyStatus + "\n";
+
+console.log("Sending email to: " + recipients.join(", ") + " body length: " + body.length);
+MailApp.sendEmail(recipients.join(","), subject, body);
+console.log("Email sent");
+// Sequential ref
+var lastRow = sheet.getLastRow();
+var refNum = "EGG-" + (lastRow + 1).toString().padStart(3, '0');  // EGG-001, EGG-002
+data.refNum = refNum;
+
+    // Return JSON response with CORS headers (success!)
+    console.log("Returning success");
+    return ContentService
+      .createTextOutput(JSON.stringify({ result: "success" }))
+      .setMimeType(ContentService.MimeType.JSON)
+      .setHeaders(corsHeaders);
+
+  } catch (error) {
+    console.error("GAS Error: " + error.message + " at line " + error.lineNumber);
+    return ContentService
+      .createTextOutput(JSON.stringify({ result: "error", message: error.message }))
+      .setMimeType(ContentService.MimeType.JSON)
+      .setHeaders(corsHeaders);
+  }
+}
