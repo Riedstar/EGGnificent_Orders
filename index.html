@@ -8,12 +8,12 @@
   <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 
   <!-- Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7F8KJ3RJKW"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7F8KJ3J3RJKW"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-7F8KJ3RJKW');
+    gtag('config', 'G-7F8KJ3J3RJKW');
   </script>
 
   <!-- Font Awesome for Icons -->
@@ -24,6 +24,9 @@
 
   <!-- QR Code for PayShap -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <!-- Stripe for Card Payments -->
+  <script src="https://js.stripe.com/v3/"></script>
 
   <style>
     body { 
@@ -295,7 +298,7 @@
     // Automatically set the address when "Collection" is selected
     deliverySelect.addEventListener("change", () => {
       if (deliverySelect.value === "Collection") {
-        addressInput.value = "No 17 Lucas Str Ext 9 Eldorado park 1811";
+        addressInput.value = "No 17 Lucas Street Ext 9 Eldorado Park 1811";
         addressInput.readOnly = true;
       } else {
         addressInput.value = "";
@@ -415,4 +418,3 @@
   </script>
 </body>
 </html>
-
