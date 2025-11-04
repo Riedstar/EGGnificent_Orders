@@ -337,15 +337,24 @@
         document.body.appendChild(van);
         setTimeout(() => van.remove(), 3000);
 
-        // Confetti burst
-        if (typeof confetti !== 'undefined') {
-          confetti({
-            particleCount: 100,
-            spread: 70,
-            origin: { y: 0.6 },
-            colors: ['#f59e0b', '#d97706', '#fff8e1', '#10b981']
-          });
+      // Floating trays animation
+for (let i = 0; i < 5; i++) {
+  setTimeout(() => {
+    const tray = document.createElement('div');
+    tray.innerHTML = '🥚🥚🥚';  // Tray of eggs
+    tray.style.cssText = 'position: fixed; font-size: 2em; z-index: 1000; left: ' + Math.random() * 100 + 'vw; top: 80vh; animation: floatUp 2s ease-out forwards;';
+    document.head.insertAdjacentHTML('beforeend', `
+      <style>
+        @keyframes floatUp {
+          0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+          100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
         }
+      </style>
+    `);
+    document.body.appendRow(tray);
+    setTimeout(() => tray.remove(), 2000);
+  }, i * 200);  // Staggered start
+}
 
         // Re-enable button
         submitBtn.disabled = false;
@@ -374,3 +383,4 @@
   </script>
 </body>
 </html>
+
