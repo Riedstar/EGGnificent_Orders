@@ -18,8 +18,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Canvas Confetti for Animation -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <!-- QR Code for PayShap (commented out as per your note) -->
-  <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>-->
+  <!-- QR Code for PayShap -->
+  <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <!-- Stripe for Card Payments -->
   <script src="https://js.stripe.com/v3/"></script>
   <style>
@@ -206,7 +206,94 @@
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.02); }
     }
-    /* PayShap QR Styling (for when uncommented) */
+  </style>
+</head>
+<body>
+  <!-- Black Friday Banner (hidden by default) -->
+  <div id="bfBanner" class="bf-banner bf-theme">🛍️ BLACK FRIDAY SPECIAL: R59/Tray – Save Big! (Nov 28-30 Only) 🛍️</div>
+  <h1>Egnificent Trays Order</h1>
+  <form id="orderForm">
+    <label for="name">Name:</label>
+    <input type="text" id="name" required>
+    <label for="email">Email:</label>
+    <input type="email" id="email" required>
+    <label for="quantitySelect">Trays:</label>
+    <select id="quantitySelect">
+      <option value="1 Tray">1 Tray</option>
+      <option value="2 Trays">2 Trays</option>
+      <option value="3 Trays">3 Trays</option>
+    </select>
+    <label>
+      <input type="checkbox" id="recurring-toggle"> Recurring Order?
+    </label>
+    <div id="recurring" style="display: none;">
+      <label for="recurring">Frequency:</label>
+      <select id="recurring">
+        <option value="weekly">Weekly</option>
+        <option value="biweekly">Bi-Weekly</option>
+      </select>
+    </div>
+    <label for="notes">Special Notes:</label>
+    <textarea id="notes" rows="3" placeholder="E.g., Delivery instructions..."></textarea>
+    <button type="button" onclick="calculatePrice()">Preview Pricing</button>
+    <div id="pricing"></div>
+    <button type="submit">Place Order 🚚</button>
+    <div id="message"></div>
+  </form>
+  <script>
+    // Toggle recurring fields
+    document.getElementById('recurring-toggle').addEventListener('change', function() {
+      document.getElementById('recurring').style.display = this.checked ? 'block' : 'none';
+    });
+    function isBlackFriday() {
+      const today = new Date();
+      const bfStart = new Date('2025-11-28');
+      const bfEnd = new Date('2025-11-30');
+      return today >= bfStart && today <= bfEnd;
+    }
+    function calculatePrice() {
+      const quantity = document.getElementById('quantitySelect').value;
+      const trays = parseInt(quantity.match(/\d+/)?.[0] || 0);
+     
+      // Pricing logic with BF override
+      let base = isBlackFriday() ? (trays * 59) : (trays * 65);
+      let deliveryFee = 0; // Add logic if needed
+      let paymentFee = 0;
+      let loyaltyDiscount = 0;
+     
+      // Loyalty logic (skipped on BF)
+      let loyaltyStatus = "";
+      if (!isBlackFriday()) {
+        // Your existing loyalty calc here (e.g., fetch from server)
+        loyaltyStatus = "Loyalty: 0/12 trays to freebie"; // Placeholder
+      }
+     
+      const total = base + deliveryFee + paymentFee - loyaltyDiscount;
+     
+      // Update pricing display
+      document.getElementById('pricing').innerHTML = `
+        <p><strong>Total: R${total}</strong></p>
+        <p>Base: R${base} ${isBlackFriday() ? '(BF Special! 💥)' : '(Standard)'}</p>
+        ${loyaltyStatus ? `<p>${loyaltyStatus}</p>` : ''}
+      `;
+    }
+    // Apply BF theme on load
+    if (isBlackFriday()) {
+      document.body.classList.add('bf-mode');
+      document.getElementById('bfBanner').classList.add('active');
+      // Optional: Auto-trigger price calc to show BF pricing
+      calculatePrice();
+    }
+    // Form submission (your existing logic, e.g., google.script.run)
+    document.getElementById('orderForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      // Add loading state, confetti/van animation, etc. as per your full script
+      document.getElementById('message').innerHTML = '✅ Order placed! Thanks for choosing Egnificent!';
+      // Trigger animations here if defined
+    });
+  </script>
+</body>
+    /* PayShap QR Styling */
     #payShapQR {
       text-align: center;
       margin-top: 10px;
@@ -220,8 +307,6 @@
   </style>
 </head>
 <body>
-  <!-- Black Friday Banner (hidden by default) -->
-  <div id="bfBanner" class="bf-banner bf-theme">🛍️ BLACK FRIDAY SPECIAL: R59/Tray – Save Big! (Nov 28-30 Only) 🛍️</div>
   <h1>🥚 EGGnificent Orders</h1>
   <form id="orderForm">
     <input type="text" id="name" placeholder="👤 Full Name" required autocomplete="name" />
@@ -243,7 +328,7 @@
       <option value="">💳 Select Payment Method</option>
       <option value="Cash">Cash</option>
       <option value="Card">Card</option>
-      <!-- <option value="PayShap">PayShap</option> --> <!-- Uncomment when ready -->
+      <!-- <option value="Card">Payshap</option> --> <!--Commenting out for now since its creating issues in the build -->
     </select>
     <select id="delivery" required>
       <option value="">🚚 Select Delivery Option</option>
@@ -271,7 +356,6 @@
     <div id="total" style="color: #333; font-weight: bold;">Total: R0.00</div>
   </div>
   <p id="message"></p>
-
   <script>
     const scriptURL = "https://script.google.com/macros/s/AKfycbwi8uc_Zc0JYv-1sOfpTJlUSo8SHORCJJ7I_ILrahd8ONzhN_9ARLRRUa26AZCnUD5W/exec";
     const form = document.getElementById("orderForm");
@@ -281,21 +365,11 @@
     const recurringToggle = document.getElementById("recurring-toggle");
     const recurringSelect = document.getElementById("recurring");
     const paymentSelect = document.getElementById("payment");
-
-    // Black Friday Check
-    function isBlackFriday() {
-      const today = new Date();
-      const bfStart = new Date('2025-11-28');
-      const bfEnd = new Date('2025-11-30');
-      return today >= bfStart && today <= bfEnd;
-    }
-
     // Toggle recurring dropdown
     recurringToggle.addEventListener("change", () => {
       recurringSelect.style.display = recurringToggle.checked ? "block" : "none";
       getPricing(); // Recalc if pricing affects recurring
     });
-
     // Pricing & Loyalty function (returns calc values for display/submit)
     function getPricing() {
       const quantity = document.getElementById("quantity").value;
@@ -311,13 +385,12 @@
       }
      
       let trays = parseInt(quantity.match(/\d+/)?.[0] || 0); // Extract number from "2 Trays"
-      let base = isBlackFriday() ? (trays * 59) : (trays * 65); // BF override: R59/tray
+      let base = trays * 65; // R65/tray (no discount for recurring)
       let deliveryFee = 0;
       let paymentFee = 0;
       let loyaltyDiscount = 0;
-      let loyaltyStatus = "";
+      let loyaltyStatus = "Loyalty: 0/12 trays to freebie";
      
-      // Delivery fee logic (unchanged)
       if (delivery === "Delivery" && (
         address.includes("eldorado park") || address.includes("eldos") ||
         address.includes("klipspruit west") || address.includes("klipspruit")
@@ -327,23 +400,16 @@
         deliveryFee = 20; // Standard fee outside free zones
       }
      
-      // Loyalty logic (skipped on BF)
-      if (!isBlackFriday()) {
-        loyaltyStatus = "Loyalty: 0/12 trays to freebie"; // Your existing loyalty calc here (e.g., fetch from server)
-      }
-     
       let total = base + deliveryFee + paymentFee - loyaltyDiscount;
-      document.getElementById("total").textContent = `Total: R${total.toFixed(2)} ${isBlackFriday() ? '(BF Special! 💥)' : ''}`;
-      document.getElementById("loyalty-status").textContent = loyaltyStatus;
+      document.getElementById("total").textContent = `Total: R${total.toFixed(2)}`;
      
       return {
         total: total,
         loyaltyDiscount: loyaltyDiscount,
-        pointsEarned: trays, // Fixed: was loyaltyDiscount before
+        pointsEarned: trays,
         loyaltyStatus: loyaltyStatus
       };
     }
-
     // Listen for changes
     document.getElementById("phone").addEventListener("blur", getPricing);
     document.getElementById("quantity").addEventListener("change", getPricing);
@@ -352,15 +418,7 @@
     document.getElementById("recurring").addEventListener("change", getPricing);
     document.getElementById("address").addEventListener("blur", getPricing);
     // Call on load
-    window.addEventListener("load", () => {
-      getPricing();
-      // Apply BF theme on load
-      if (isBlackFriday()) {
-        document.body.classList.add('bf-mode');
-        document.getElementById('bfBanner').classList.add('active');
-      }
-    });
-
+    window.addEventListener("load", getPricing);
     // Automatically set the address when "Collection" is selected
     deliverySelect.addEventListener("change", () => {
       if (deliverySelect.value === "Collection") {
@@ -372,9 +430,9 @@
       }
       getPricing(); // Recalc after change
     });
-
-    // PayShap QR on Payment Select (commented out as per your note)
-    /* paymentSelect.addEventListener("change", () => {
+     // Commenting the QR section out its not working
+    /*/ PayShap QR on Payment Select
+    paymentSelect.addEventListener("change", () => { -->
       if (paymentSelect.value === "PayShap") {
         // Generate QR on payment select (immediate, larger 200x200 for easy scan)
         const shapId = '+27-832000088'; // Your cellphone ShapID (e.g., '0821234567')
@@ -397,7 +455,6 @@
         document.getElementById("payShapQR").remove(); // Hide QR for other payments
       }
     }); */
-
     // Stylish submit with animation
     form.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -415,7 +472,7 @@
       const pricing = getPricing();
       data.total = pricing.total;
       data.loyaltyDiscount = pricing.loyaltyDiscount;
-      data.pointsEarned = pricing.pointsEarned;
+      data.pointsEarned = pricing.loyaltyDiscount;
       data.loyaltyStatus = pricing.loyaltyStatus;
       // Track event (add recurring)
       gtag('event', 'order_submit', {
