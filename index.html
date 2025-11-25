@@ -29,19 +29,20 @@
   <script src="https://js.stripe.com/v3/"></script>
 
   <style>
-    body { 
-      font-family: "Poppins", sans-serif; 
-      background: linear-gradient(135deg, #fff8e1 0%, #fed7aa 50%, #ffedcc 100%);  /* Eggshell to yolk fade for modern vibe */
-      color: #333; 
-      padding: 20px; 
-      max-width: 500px; 
-      margin: 0 auto; 
+    /* Default Theme: Your Egg-Inspired Modern Vibe */
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #fff8e1 0%, #fed7aa 50%, #ffedcc 100%); /* Eggshell to yolk fade for modern vibe */
+      color: #333;
+      padding: 20px;
+      max-width: 500px;
+      margin: 0 auto;
       min-height: 100vh;
     }
-    h1 { 
-      text-align: center; 
-      color: #d97706; 
-      text-shadow: 0 2px 4px rgba(217, 119, 6, 0.2);  /* Soft orange glow */
+    h1 {
+      text-align: center;
+      color: #d97706;
+      text-shadow: 0 2px 4px rgba(217, 119, 6, 0.2); /* Soft orange glow */
       margin-bottom: 30px;
       animation: fadeInDown 0.8s ease-out;
     }
@@ -49,64 +50,64 @@
       from { opacity: 0; transform: translateY(-20px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    form { 
-      display: flex; 
-      flex-direction: column; 
-      gap: 12px; 
-      background: rgba(255, 255, 255, 0.9);  /* Semi-transparent white for modern card feel */
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.9); /* Semi-transparent white for modern card feel */
       padding: 20px;
       border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(217, 119, 6, 0.1);  /* Subtle shadow for depth */
+      box-shadow: 0 4px 20px rgba(217, 119, 6, 0.1); /* Subtle shadow for depth */
     }
-    input, select, textarea { 
-      padding: 12px 10px;  /* Slightly more padding for modern touch */
-      border-radius: 8px; 
-      border: 1px solid #ccc; 
+    input, select, textarea {
+      padding: 12px 10px; /* Slightly more padding for modern touch */
+      border-radius: 8px;
+      border: 1px solid #ccc;
       font-size: 1em;
-      transition: border-color 0.3s ease;  /* Smooth focus */
+      transition: border-color 0.3s ease; /* Smooth focus */
     }
     input:focus, select:focus, textarea:focus {
-      border-color: #f59e0b;  /* Orange glow on focus */
+      border-color: #f59e0b; /* Orange glow on focus */
       outline: none;
     }
-    input[readonly], textarea[readonly] { 
-      background-color: #f3f3f3; 
+    input[readonly], textarea[readonly] {
+      background-color: #f3f3f3;
     }
-    button { 
-      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);  /* Gradient for depth */
-      color: white; 
-      padding: 14px;  /* Taller for thumb-friendly mobile */
-      border: none; 
-      border-radius: 8px; 
-      font-weight: bold; 
-      cursor: pointer; 
-      transition: all 0.3s ease;  /* Smooth hover */
+    button {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); /* Gradient for depth */
+      color: white;
+      padding: 14px; /* Taller for thumb-friendly mobile */
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease; /* Smooth hover */
       position: relative;
       overflow: hidden;
     }
-    button:hover { 
-      transform: translateY(-2px);  /* Lift on hover */
-      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);  /* Orange shadow */
+    button:hover {
+      transform: translateY(-2px); /* Lift on hover */
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); /* Orange shadow */
     }
-    button:active { 
-      transform: translateY(0);  /* Press down */
+    button:active {
+      transform: translateY(0); /* Press down */
     }
-    #message { 
-      text-align: center; 
-      font-weight: bold; 
-      margin-top: 10px; 
-      transition: opacity 0.3s ease, transform 0.3s ease;  /* Smooth show */
+    #message {
+      text-align: center;
+      font-weight: bold;
+      margin-top: 10px;
+      transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth show */
     }
     #message[style*="✅"] {
       opacity: 1;
       transform: scale(1.05);
-      color: #10b981;  /* Green for success */
+      color: #10b981; /* Green for success */
     }
-    #pricing { 
-      background: rgba(255, 255, 255, 0.9);  /* Card for total/loyalty */
-      padding: 12px; 
-      border-radius: 8px; 
-      box-shadow: 0 2px 10px rgba(217, 119, 6, 0.1);  /* Lifted card */
+    #pricing {
+      background: rgba(255, 255, 255, 0.9); /* Card for total/loyalty */
+      padding: 12px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(217, 119, 6, 0.1); /* Lifted card */
       margin-top: 10px;
       animation: fadeInUp 0.5s ease-out;
     }
@@ -163,6 +164,156 @@
       margin-left: 24px;
       transition: margin-left 0.3s ease;
     }
+
+    /* Black Friday Theme Overrides (hidden/applied via JS) */
+    .bf-theme { display: none; }
+    .bf-theme.active { display: block !important; }
+    body.bf-mode {
+      background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #2d1b00 100%); /* Dark noir to deep brown for BF intensity */
+      color: #ffd700; /* Gold text for premium deal feel */
+    }
+    body.bf-mode h1 {
+      color: #ffd700;
+      text-shadow: 0 2px 4px rgba(255, 215, 0, 0.3); /* Gold glow */
+    }
+    body.bf-mode form {
+      background: rgba(0, 0, 0, 0.8); /* Dark semi-transparent */
+      box-shadow: 0 4px 20px rgba(255, 215, 0, 0.2); /* Gold shadow */
+    }
+    body.bf-mode input:focus, body.bf-mode select:focus, body.bf-mode textarea:focus {
+      border-color: #ffd700; /* Gold focus */
+    }
+    body.bf-mode button {
+      background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%); /* Red gradient for urgency */
+      box-shadow: 0 4px 12px rgba(255, 0, 0, 0.4); /* Red shadow on hover */
+    }
+    body.bf-mode button:hover {
+      box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4); /* Gold lift shadow */
+    }
+    body.bf-mode #pricing {
+      background: rgba(0, 0, 0, 0.8);
+      box-shadow: 0 2px 10px rgba(255, 215, 0, 0.2); /* Gold lift */
+    }
+    body.bf-mode #message[style*="✅"] {
+      color: #ffd700; /* Gold success for BF */
+    }
+    .bf-banner {
+      background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+      color: #000;
+      text-align: center;
+      padding: 15px;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 1.2em;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Black Friday Banner (hidden by default) -->
+  <div id="bfBanner" class="bf-banner bf-theme">🛍️ BLACK FRIDAY SPECIAL: R59/Tray – Save Big! (Nov 28-30 Only) 🛍️</div>
+
+  <h1>Egnificent Trays Order</h1>
+  <form id="orderForm">
+    <label for="name">Name:</label>
+    <input type="text" id="name" required>
+
+    <label for="email">Email:</label>
+    <input type="email" id="email" required>
+
+    <label for="quantitySelect">Trays:</label>
+    <select id="quantitySelect">
+      <option value="1 Tray">1 Tray</option>
+      <option value="2 Trays">2 Trays</option>
+      <option value="3 Trays">3 Trays</option>
+    </select>
+
+    <label>
+      <input type="checkbox" id="recurring-toggle"> Recurring Order?
+    </label>
+    <div id="recurring" style="display: none;">
+      <label for="recurring">Frequency:</label>
+      <select id="recurring">
+        <option value="weekly">Weekly</option>
+        <option value="biweekly">Bi-Weekly</option>
+      </select>
+    </div>
+
+    <label for="notes">Special Notes:</label>
+    <textarea id="notes" rows="3" placeholder="E.g., Delivery instructions..."></textarea>
+
+    <button type="button" onclick="calculatePrice()">Preview Pricing</button>
+    <div id="pricing"></div>
+
+    <button type="submit">Place Order 🚚</button>
+    <div id="message"></div>
+  </form>
+
+  <script>
+    // Toggle recurring fields
+    document.getElementById('recurring-toggle').addEventListener('change', function() {
+      document.getElementById('recurring').style.display = this.checked ? 'block' : 'none';
+    });
+
+    function isBlackFriday() {
+      const today = new Date();
+      const bfStart = new Date('2025-11-28');
+      const bfEnd = new Date('2025-11-30');
+      return today >= bfStart && today <= bfEnd;
+    }
+
+    function calculatePrice() {
+      const quantity = document.getElementById('quantitySelect').value;
+      const trays = parseInt(quantity.match(/\d+/)?.[0] || 0);
+      
+      // Pricing logic with BF override
+      let base = isBlackFriday() ? (trays * 59) : (trays * 65);
+      let deliveryFee = 0; // Add logic if needed
+      let paymentFee = 0;
+      let loyaltyDiscount = 0;
+      
+      // Loyalty logic (skipped on BF)
+      let loyaltyStatus = "";
+      if (!isBlackFriday()) {
+        // Your existing loyalty calc here (e.g., fetch from server)
+        loyaltyStatus = "Loyalty: 0/12 trays to freebie"; // Placeholder
+      }
+      
+      const total = base + deliveryFee + paymentFee - loyaltyDiscount;
+      
+      // Update pricing display
+      document.getElementById('pricing').innerHTML = `
+        <p><strong>Total: R${total}</strong></p>
+        <p>Base: R${base} ${isBlackFriday() ? '(BF Special! 💥)' : '(Standard)'}</p>
+        ${loyaltyStatus ? `<p>${loyaltyStatus}</p>` : ''}
+      `;
+    }
+
+    // Apply BF theme on load
+    if (isBlackFriday()) {
+      document.body.classList.add('bf-mode');
+      document.getElementById('bfBanner').classList.add('active');
+      // Optional: Auto-trigger price calc to show BF pricing
+      calculatePrice();
+    }
+
+    // Form submission (your existing logic, e.g., google.script.run)
+    document.getElementById('orderForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      // Add loading state, confetti/van animation, etc. as per your full script
+      document.getElementById('message').innerHTML = '✅ Order placed! Thanks for choosing Egnificent!';
+      // Trigger animations here if defined
+    });
+  </script>
+</body>
+
+ 
     /* PayShap QR Styling */
     #payShapQR {
       text-align: center;
@@ -418,6 +569,7 @@
   </script>
 </body>
 </html>
+
 
 
 
