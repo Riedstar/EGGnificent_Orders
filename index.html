@@ -19,11 +19,10 @@
   <!-- Canvas Confetti for Animation -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <!-- QR Code for PayShap -->
-  <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>-->
   <!-- Stripe for Card Payments -->
   <script src="https://js.stripe.com/v3/"></script>
   <style>
-    /* Default Theme: Your Egg-Inspired Modern Vibe */
     body {
       font-family: "Poppins", sans-serif;
       background: linear-gradient(135deg, #fff8e1 0%, #fed7aa 50%, #ffedcc 100%); /* Eggshell to yolk fade for modern vibe */
@@ -97,18 +96,6 @@
       transform: scale(1.05);
       color: #10b981; /* Green for success */
     }
-    #pricing {
-      background: rgba(255, 255, 255, 0.9); /* Card for total/loyalty */
-      padding: 12px;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(217, 119, 6, 0.1); /* Lifted card */
-      margin-top: 10px;
-      animation: fadeInUp 0.5s ease-out;
-    }
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
     /* Loading Spinner in Button */
     button.loading::after {
       content: '';
@@ -158,141 +145,6 @@
       margin-left: 24px;
       transition: margin-left 0.3s ease;
     }
-    /* Black Friday Theme Overrides (hidden/applied via JS) */
-    .bf-theme { display: none; }
-    .bf-theme.active { display: block !important; }
-    body.bf-mode {
-      background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #2d1b00 100%); /* Dark noir to deep brown for BF intensity */
-      color: #ffd700; /* Gold text for premium deal feel */
-    }
-    body.bf-mode h1 {
-      color: #ffd700;
-      text-shadow: 0 2px 4px rgba(255, 215, 0, 0.3); /* Gold glow */
-    }
-    body.bf-mode form {
-      background: rgba(0, 0, 0, 0.8); /* Dark semi-transparent */
-      box-shadow: 0 4px 20px rgba(255, 215, 0, 0.2); /* Gold shadow */
-    }
-    body.bf-mode input:focus, body.bf-mode select:focus, body.bf-mode textarea:focus {
-      border-color: #ffd700; /* Gold focus */
-    }
-    body.bf-mode button {
-      background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%); /* Red gradient for urgency */
-      box-shadow: 0 4px 12px rgba(255, 0, 0, 0.4); /* Red shadow on hover */
-    }
-    body.bf-mode button:hover {
-      box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4); /* Gold lift shadow */
-    }
-    body.bf-mode #pricing {
-      background: rgba(0, 0, 0, 0.8);
-      box-shadow: 0 2px 10px rgba(255, 215, 0, 0.2); /* Gold lift */
-    }
-    body.bf-mode #message[style*="✅"] {
-      color: #ffd700; /* Gold success for BF */
-    }
-    .bf-banner {
-      background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-      color: #000;
-      text-align: center;
-      padding: 15px;
-      border-radius: 12px;
-      font-weight: bold;
-      font-size: 1.2em;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.02); }
-    }
-  </style>
-</head>
-<body>
-  <!-- Black Friday Banner (hidden by default) -->
-  <div id="bfBanner" class="bf-banner bf-theme">🛍️ BLACK FRIDAY SPECIAL: R59/Tray – Save Big! (Nov 28-30 Only) 🛍️</div>
-  <h1>Egnificent Trays Order</h1>
-  <form id="orderForm">
-    <label for="name">Name:</label>
-    <input type="text" id="name" required>
-    <label for="email">Email:</label>
-    <input type="email" id="email" required>
-    <label for="quantitySelect">Trays:</label>
-    <select id="quantitySelect">
-      <option value="1 Tray">1 Tray</option>
-      <option value="2 Trays">2 Trays</option>
-      <option value="3 Trays">3 Trays</option>
-    </select>
-    <label>
-      <input type="checkbox" id="recurring-toggle"> Recurring Order?
-    </label>
-    <div id="recurring" style="display: none;">
-      <label for="recurring">Frequency:</label>
-      <select id="recurring">
-        <option value="weekly">Weekly</option>
-        <option value="biweekly">Bi-Weekly</option>
-      </select>
-    </div>
-    <label for="notes">Special Notes:</label>
-    <textarea id="notes" rows="3" placeholder="E.g., Delivery instructions..."></textarea>
-    <button type="button" onclick="calculatePrice()">Preview Pricing</button>
-    <div id="pricing"></div>
-    <button type="submit">Place Order 🚚</button>
-    <div id="message"></div>
-  </form>
-  <script>
-    // Toggle recurring fields
-    document.getElementById('recurring-toggle').addEventListener('change', function() {
-      document.getElementById('recurring').style.display = this.checked ? 'block' : 'none';
-    });
-    function isBlackFriday() {
-      const today = new Date();
-      const bfStart = new Date('2025-11-28');
-      const bfEnd = new Date('2025-11-30');
-      return today >= bfStart && today <= bfEnd;
-    }
-    function calculatePrice() {
-      const quantity = document.getElementById('quantitySelect').value;
-      const trays = parseInt(quantity.match(/\d+/)?.[0] || 0);
-     
-      // Pricing logic with BF override
-      let base = isBlackFriday() ? (trays * 59) : (trays * 65);
-      let deliveryFee = 0; // Add logic if needed
-      let paymentFee = 0;
-      let loyaltyDiscount = 0;
-     
-      // Loyalty logic (skipped on BF)
-      let loyaltyStatus = "";
-      if (!isBlackFriday()) {
-        // Your existing loyalty calc here (e.g., fetch from server)
-        loyaltyStatus = "Loyalty: 0/12 trays to freebie"; // Placeholder
-      }
-     
-      const total = base + deliveryFee + paymentFee - loyaltyDiscount;
-     
-      // Update pricing display
-      document.getElementById('pricing').innerHTML = `
-        <p><strong>Total: R${total}</strong></p>
-        <p>Base: R${base} ${isBlackFriday() ? '(BF Special! 💥)' : '(Standard)'}</p>
-        ${loyaltyStatus ? `<p>${loyaltyStatus}</p>` : ''}
-      `;
-    }
-    // Apply BF theme on load
-    if (isBlackFriday()) {
-      document.body.classList.add('bf-mode');
-      document.getElementById('bfBanner').classList.add('active');
-      // Optional: Auto-trigger price calc to show BF pricing
-      calculatePrice();
-    }
-    // Form submission (your existing logic, e.g., google.script.run)
-    document.getElementById('orderForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      // Add loading state, confetti/van animation, etc. as per your full script
-      document.getElementById('message').innerHTML = '✅ Order placed! Thanks for choosing Egnificent!';
-      // Trigger animations here if defined
-    });
-  </script>
-</body>
     /* PayShap QR Styling */
     #payShapQR {
       text-align: center;
@@ -304,9 +156,99 @@
     #payShapQR canvas {
       margin: 10px 0;
     }
+
+    /* Enhanced Pricing Display for Maximum Clarity */
+    #pricing {
+      text-align: center;
+      margin-top: 15px;
+      padding: 20px;
+      border-radius: 16px;
+      font-weight: bold;
+      animation: fadeInUp 0.5s ease-out;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    #total {
+      font-size: 2em; /* Extra large for unmissable visibility */
+      color: #d97706; /* Bold orange by default */
+      font-weight: bold;
+      margin-top: 8px;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    }
+    #loyalty-status {
+      color: #d97706;
+      font-weight: bold;
+      margin-bottom: 5px;
+      font-size: 0.9em;
+    }
+
+    /* Simple Dark Theme for Black Friday (applied via JS class) */
+    body.bf-mode {
+      background: #121212; /* Dark background */
+      color: #e0e0e0; /* Light text */
+    }
+    body.bf-mode h1 {
+      color: #ff6b35; /* Brighter orange for dark mode */
+    }
+    body.bf-mode form {
+      background: rgba(255, 255, 255, 0.05); /* Dark semi-transparent */
+      color: #e0e0e0;
+    }
+    body.bf-mode input, body.bf-mode select, body.bf-mode textarea {
+      background: #1e1e1e;
+      border-color: #333;
+      color: #e0e0e0;
+    }
+    body.bf-mode input::placeholder, body.bf-mode textarea::placeholder {
+      color: #888;
+    }
+    body.bf-mode input:focus, body.bf-mode select:focus, body.bf-mode textarea:focus {
+      border-color: #ff6b35;
+    }
+    body.bf-mode button {
+      background: linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%); /* Darker orange gradient */
+    }
+    body.bf-mode button:hover {
+      box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+    }
+    body.bf-mode #pricing {
+      background: #2a2a2a; /* Solid dark gray for strong contrast */
+      border: 2px solid #ff6b35; /* Thick orange border */
+      color: #fff; /* White text base */
+      padding: 25px; /* More padding for breathing room */
+      box-shadow: 0 6px 25px rgba(255, 107, 53, 0.3); /* Glowing orange shadow */
+    }
+    body.bf-mode #loyalty-status {
+      color: #ff6b35;
+    }
+    body.bf-mode #total {
+      color: #fff; /* Pure white for max visibility */
+      font-size: 2.2em; /* Huge in dark mode */
+      text-shadow: 0 0 15px #ff6b35, 0 2px 4px rgba(0, 0, 0, 0.5); /* Bright orange glow + dark shadow */
+    }
+    body.bf-mode #message[style*="✅"] {
+      color: #10b981;
+    }
+    .bf-banner {
+      background: #ff6b35;
+      color: #000;
+      text-align: center;
+      padding: 15px;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 1.2em;
+      margin-bottom: 20px;
+      display: none; /* Hidden by default, shown via JS */
+    }
   </style>
 </head>
 <body>
+  <!-- Black Friday Banner (hidden by default) -->
+  <div id="bfBanner" class="bf-banner">🛍️ BLACK FRIDAY SPECIAL: R59/Tray – Save Big! (Nov 28-30 Only) 🛍️</div>
+
   <h1>🥚 EGGnificent Orders</h1>
   <form id="orderForm">
     <input type="text" id="name" placeholder="👤 Full Name" required autocomplete="name" />
@@ -328,7 +270,7 @@
       <option value="">💳 Select Payment Method</option>
       <option value="Cash">Cash</option>
       <option value="Card">Card</option>
-      <!-- <option value="Card">Payshap</option> --> <!--Commenting out for now since its creating issues in the build -->
+      <!-- <option value="PayShap">PayShap</option> --> <!--Commenting out for now since its creating issues in the build -->
     </select>
     <select id="delivery" required>
       <option value="">🚚 Select Delivery Option</option>
@@ -351,9 +293,9 @@
     <textarea id="notes" placeholder="📝 Example: 'Bring change for XXX amount' or 'Please deliver at 17h00'" required></textarea>
     <button type="submit" id="submitBtn">Submit Order</button>
   </form>
-  <div id="pricing" style="text-align: center; margin-top: 10px;">
-    <div id="loyalty-status" style="color: #d97706; font-weight: bold;">Loyalty: 0/12 trays to freebie</div>
-    <div id="total" style="color: #333; font-weight: bold;">Total: R0.00</div>
+  <div id="pricing">
+    <div id="loyalty-status">Loyalty: 0/12 trays to freebie</div>
+    <div id="total">Total: R0.00</div>
   </div>
   <p id="message"></p>
   <script>
@@ -370,6 +312,10 @@
       recurringSelect.style.display = recurringToggle.checked ? "block" : "none";
       getPricing(); // Recalc if pricing affects recurring
     });
+    // Black Friday Check (FORCED TRUE FOR TESTING - Revert to real dates for live deploy!)
+    function isBlackFriday() {
+      return true; // Force BF mode now (swap back: const today = new Date(); const bfStart = new Date('2025-11-28'); const bfEnd = new Date('2025-11-30'); return today >= bfStart && today <= bfEnd;)
+    }
     // Pricing & Loyalty function (returns calc values for display/submit)
     function getPricing() {
       const quantity = document.getElementById("quantity").value;
@@ -380,16 +326,16 @@
      
       if (!quantity || !delivery || !payment) {
         document.getElementById("total").textContent = "Total: R0.00";
-        document.getElementById("loyalty-status").textContent = "Loyalty: 0/12 trays to freebie";
+        document.getElementById("loyalty-status").textContent = "";
         return { total: 0, loyaltyDiscount: 0, pointsEarned: 0, loyaltyStatus: "" };
       }
      
       let trays = parseInt(quantity.match(/\d+/)?.[0] || 0); // Extract number from "2 Trays"
-      let base = trays * 65; // R65/tray (no discount for recurring)
+      let base = isBlackFriday() ? (trays * 59) : (trays * 65); // BF override: R59/tray
       let deliveryFee = 0;
       let paymentFee = 0;
       let loyaltyDiscount = 0;
-      let loyaltyStatus = "Loyalty: 0/12 trays to freebie";
+      let loyaltyStatus = "";
      
       if (delivery === "Delivery" && (
         address.includes("eldorado park") || address.includes("eldos") ||
@@ -400,8 +346,14 @@
         deliveryFee = 20; // Standard fee outside free zones
       }
      
+      // Loyalty logic (commented/skipped on BF)
+      if (!isBlackFriday()) {
+        loyaltyStatus = "Loyalty: 0/12 trays to freebie";
+      } // else: loyaltyStatus remains "", hiding it
+     
       let total = base + deliveryFee + paymentFee - loyaltyDiscount;
-      document.getElementById("total").textContent = `Total: R${total.toFixed(2)}`;
+      document.getElementById("total").textContent = `Total: R${total.toFixed(2)}${isBlackFriday() ? ' (BF Special! 💥)' : ''}`;
+      document.getElementById("loyalty-status").textContent = loyaltyStatus;
      
       return {
         total: total,
@@ -418,7 +370,14 @@
     document.getElementById("recurring").addEventListener("change", getPricing);
     document.getElementById("address").addEventListener("blur", getPricing);
     // Call on load
-    window.addEventListener("load", getPricing);
+    window.addEventListener("load", () => {
+      getPricing();
+      // Apply BF dark theme on load
+      if (isBlackFriday()) {
+        document.body.classList.add('bf-mode');
+        document.getElementById('bfBanner').style.display = 'block';
+      }
+    });
     // Automatically set the address when "Collection" is selected
     deliverySelect.addEventListener("change", () => {
       if (deliverySelect.value === "Collection") {
@@ -472,7 +431,7 @@
       const pricing = getPricing();
       data.total = pricing.total;
       data.loyaltyDiscount = pricing.loyaltyDiscount;
-      data.pointsEarned = pricing.loyaltyDiscount;
+      data.pointsEarned = pricing.pointsEarned;
       data.loyaltyStatus = pricing.loyaltyStatus;
       // Track event (add recurring)
       gtag('event', 'order_submit', {
