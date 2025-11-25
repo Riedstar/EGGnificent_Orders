@@ -246,8 +246,7 @@
   </style>
 </head>
 <body>
-  <!-- Black Friday Banner (hidden by default) -->
-  <div id="bfBanner" class="bf-banner">🛍️ BLACK FRIDAY SPECIAL: R59/Tray – Save Big! (Nov 28-30 Only) 🛍️</div>
+  
 
   <h1>🥚 EGGnificent Orders</h1>
   <form id="orderForm">
@@ -312,9 +311,12 @@
       recurringSelect.style.display = recurringToggle.checked ? "block" : "none";
       getPricing(); // Recalc if pricing affects recurring
     });
-    // Black Friday Check (FORCED TRUE FOR TESTING - Revert to real dates for live deploy!)
+    // Black Friday Check
     function isBlackFriday() {
-      return true; // Force BF mode now (swap back: const today = new Date(); const bfStart = new Date('2025-11-28'); const bfEnd = new Date('2025-11-30'); return today >= bfStart && today <= bfEnd;)
+      const today = new Date();
+      const bfStart = new Date('2025-11-28');
+      const bfEnd = new Date('2025-11-30');
+      return today >= bfStart && today <= bfEnd;
     }
     // Pricing & Loyalty function (returns calc values for display/submit)
     function getPricing() {
