@@ -1,4 +1,4 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -157,93 +157,96 @@
       margin: 10px 0;
     }
 
-    /* Pricing Display Aligned with Form Boxes */
+    /* Enhanced Pricing Display for Maximum Clarity */
     #pricing {
-      padding: 12px 10px; /* Match input padding */
-      border-radius: 8px; /* Match input radius */
-      border: 1px solid #ccc; /* Match input border */
-      background: #f9f9f9; /* Light bg like readonly inputs */
-      font-size: 1em; /* Match input font */
       text-align: center;
+      margin-top: 15px;
+      padding: 20px;
+      border-radius: 16px;
       font-weight: bold;
-      margin-bottom: 0; /* Tight spacing in flow */
+      animation: fadeInUp 0.5s ease-out;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     #total {
-      color: #d97706; /* Orange for emphasis, matching theme */
-      margin: 0; /* No extra margins */
+      font-size: 2em; /* Extra large for unmissable visibility */
+      color: #d97706; /* Bold orange by default */
+      font-weight: bold;
+      margin-top: 8px;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
     }
     #loyalty-status {
       color: #d97706;
       font-weight: bold;
-      margin-bottom: 2px;
+      margin-bottom: 5px;
       font-size: 0.9em;
-      display: none; /* Hidden by default if empty */
     }
 
-    /* Subtle Dark Theme for Black Friday (applied via JS class) */
+    /* Simple Dark Theme for Black Friday (applied via JS class) */
     body.bf-mode {
-      background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%); /* Subtle dark gradient, matte finish */
-      color: #f0f0f0; /* Soft light text */
+      background: #121212; /* Dark background */
+      color: #e0e0e0; /* Light text */
     }
     body.bf-mode h1 {
-      color: #e68900; /* Muted orange for subtlety */
-      text-shadow: 0 1px 3px rgba(230, 137, 0, 0.2); /* Gentle glow */
+      color: #ff6b35; /* Brighter orange for dark mode */
     }
     body.bf-mode form {
-      background: rgba(255, 255, 255, 0.03); /* Very subtle transparency */
-      color: #f0f0f0;
-      box-shadow: 0 4px 20px rgba(230, 137, 0, 0.05); /* Faint orange tint */
+      background: rgba(255, 255, 255, 0.05); /* Dark semi-transparent */
+      color: #e0e0e0;
     }
     body.bf-mode input, body.bf-mode select, body.bf-mode textarea {
-      background: #2a2a2a; /* Soft dark input bg */
-      border-color: #404040; /* Muted border */
-      color: #f0f0f0;
+      background: #1e1e1e;
+      border-color: #333;
+      color: #e0e0e0;
     }
     body.bf-mode input::placeholder, body.bf-mode textarea::placeholder {
-      color: #707070; /* Subdued placeholder */
+      color: #888;
     }
     body.bf-mode input:focus, body.bf-mode select:focus, body.bf-mode textarea:focus {
-      border-color: #e68900; /* Muted orange focus */
-      box-shadow: 0 0 0 2px rgba(230, 137, 0, 0.1); /* Soft ring */
+      border-color: #ff6b35;
     }
     body.bf-mode button {
-      background: linear-gradient(135deg, #e68900 0%, #c77c00 100%); /* Subtle orange gradient */
+      background: linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%); /* Darker orange gradient */
     }
     body.bf-mode button:hover {
-      box-shadow: 0 4px 12px rgba(230, 137, 0, 0.2); /* Gentle shadow */
-      transform: translateY(-1px); /* Softer lift */
+      box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
     }
     body.bf-mode #pricing {
-      background: #2a2a2a; /* Match dark input bg */
-      border: 1px solid #404040; /* Muted border */
-      color: #f0f0f0;
+      background: #2a2a2a; /* Solid dark gray for strong contrast */
+      border: 2px solid #ff6b35; /* Thick orange border */
+      color: #fff; /* White text base */
+      padding: 25px; /* More padding for breathing room */
+      box-shadow: 0 6px 25px rgba(255, 107, 53, 0.3); /* Glowing orange shadow */
     }
     body.bf-mode #loyalty-status {
-      color: #e68900;
+      color: #ff6b35;
     }
     body.bf-mode #total {
-      color: #e68900; /* Muted orange for standout */
+      color: #fff; /* Pure white for max visibility */
+      font-size: 2.2em; /* Huge in dark mode */
+      text-shadow: 0 0 15px #ff6b35, 0 2px 4px rgba(0, 0, 0, 0.5); /* Bright orange glow + dark shadow */
     }
     body.bf-mode #message[style*="✅"] {
       color: #10b981;
     }
     .bf-banner {
-      background: linear-gradient(135deg, #e68900 0%, #c77c00 100%);
+      background: #ff6b35;
       color: #000;
       text-align: center;
-      padding: 12px;
-      border-radius: 8px;
+      padding: 15px;
+      border-radius: 12px;
       font-weight: bold;
-      font-size: 1.1em;
-      margin-bottom: 15px;
+      font-size: 1.2em;
+      margin-bottom: 20px;
       display: none; /* Hidden by default, shown via JS */
-      box-shadow: 0 2px 10px rgba(230, 137, 0, 0.2);
     }
   </style>
 </head>
 <body>
-  <!-- Black Friday Banner (hidden by default) -->
-  <div id="bfBanner" class="bf-banner">🛍️ BLACK FRIDAY SPECIAL: R59/Tray – Save Big! (Nov 28-30 Only) 🛍️</div>
+  
 
   <h1>🥚 EGGnificent Orders</h1>
   <form id="orderForm">
@@ -308,9 +311,12 @@
       recurringSelect.style.display = recurringToggle.checked ? "block" : "none";
       getPricing(); // Recalc if pricing affects recurring
     });
-    // Black Friday Check (FORCED TRUE FOR TESTING - Revert to real dates for live deploy!)
+    // Black Friday Check
     function isBlackFriday() {
-      return true; // Force BF mode now (swap back: const today = new Date(); const bfStart = new Date('2025-11-28'); const bfEnd = new Date('2025-11-30'); return today >= bfStart && today <= bfEnd;)
+      const today = new Date();
+      const bfStart = new Date('2025-11-28');
+      const bfEnd = new Date('2025-11-30');
+      return today >= bfStart && today <= bfEnd;
     }
     // Pricing & Loyalty function (returns calc values for display/submit)
     function getPricing() {
