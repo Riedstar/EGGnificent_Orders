@@ -244,7 +244,6 @@
   </style>
 </head>
 <body>
- 
   <h1>🥚 EGGnificent Orders</h1>
   <form id="orderForm">
     <input type="text" id="name" placeholder="👤 Full Name" required autocomplete="name" />
@@ -290,7 +289,7 @@
     <button type="submit" id="submitBtn">Submit Order</button>
   </form>
   <div id="pricing">
-    <div id="loyalty-status">Loyalty: 0/12 trays to freebie</div>
+    <div id="loyalty-status">Loyalty: 0/13 trays to freebie</div>
     <div id="total">Total: R0.00</div>
   </div>
   <p id="message"></p>
@@ -324,114 +323,92 @@
       const bfEnd = new Date('2025-11-30');
       return today >= bfStart && today <= bfEnd;
     }
-    // Pricing & Loyalty function (returns calc values for display/submit)
-    function getPricing() {
+    // Pricing & Loyalty function (async for fetch)
+    async function getPricing() {
       const quantity = document.getElementById("quantity").value;
       const delivery = document.getElementById("delivery").value;
       const payment = document.getElementById("payment").value;
       const recurring = recurringToggle.checked ? document.getElementById("recurring").value : "one-time";
       const address = document.getElementById("address").value.toLowerCase(); // For suburb check
-    
+      const phone = document.getElementById("phone").value.trim(); // For loyalty fetch
+
       if (!quantity || !delivery || !payment) {
         document.getElementById("total").textContent = "Total: R0.00";
         document.getElementById("loyalty-status").textContent = "";
         return { total: 0, loyaltyDiscount: 0, pointsEarned: 0, loyaltyStatus: "" };
       }
-    
-      let trays = parseInt(quantity.match(/\d+/)?.[0] || 0); // Extract number from "2 Trays"
+
+      let trays = parseInt(quantity.match(/\d+/)?.[0] || 0); // This order's trays
       let base = isBlackFriday() ? (trays * 59) : (trays * 65); // BF override: R59/tray
       let deliveryFee = 0;
       let paymentFee = 0;
       let loyaltyDiscount = 0;
-      let loyaltyStatus = "";
-      // Updated getPricing with loyalty fetch (async now)
-async function getPricing() {
-  const quantity = document.getElementById("quantity").value;
-  const delivery = document.getElementById("delivery").value;
-  const payment = document.getElementById("payment").value;
-  const recurring = recurringToggle.checked ? document.getElementById("recurring").value : "one-time";
-  const address = document.getElementById("address").value.toLowerCase(); // For suburb check
-  const phone = document.getElementById("phone").value.trim(); // For loyalty fetch
+      let loyaltyStatus = "Loyalty: 0/13 trays to freebie"; // Default
 
-  if (!quantity || !delivery || !payment) {
-    document.getElementById("total").textContent = "Total: R0.00";
-    document.getElementById("loyalty-status").textContent = "";
-    return { total: 0, loyaltyDiscount: 0, pointsEarned: 0, loyaltyStatus: "" };
-  }
+      // Delivery fee logic
+      if (delivery === "Delivery" && (
+        address.includes("eldorado park") || address.includes("eldos") ||
+        address.includes("klipspruit west") || address.includes("klipspruit")
+      )) {
+        deliveryFee = 0;
+      } else if (delivery === "Delivery") {
+        deliveryFee = 20; // Standard fee outside free zones
+      }
 
-  let trays = parseInt(quantity.match(/\d+/)?.[0] || 0); // This order's trays
-  let base = isBlackFriday() ? (trays * 59) : (trays * 65); // BF override: R59/tray
-  let deliveryFee = 0;
-  let paymentFee = 0;
-  let loyaltyDiscount = 0;
-  let loyaltyStatus = "Loyalty: 0/13 trays to freebie"; // Default
+      // Fetch past trays if phone entered
+      let pastTrays = 0;
+      if (phone && phone.length >= 10) { // Basic SA num check
+        try {
+          // Use GET for loyalty query (avoids no-cors read issue)
+          const loyaltyUrl = scriptURL.replace('/exec', '') + '?action=getLoyalty&phone=' + encodeURIComponent(phone);
+          const response = await fetch(loyaltyUrl);
+          if (response.ok) {
+            const result = await response.json();
+            pastTrays = result.pastTrays || 0;
+            // Cache for offline
+            localStorage.setItem(`loyalty_${phone}`, pastTrays);
+          } else {
+            // Fallback to localStorage
+            pastTrays = parseInt(localStorage.getItem(`loyalty_${phone}`)) || 0;
+          }
+        } catch (err) {
+          console.warn("Loyalty fetch issue:", err);
+          pastTrays = parseInt(localStorage.getItem(`loyalty_${phone}`)) || 0;
+        }
+      }
 
-  // Delivery fee logic (unchanged)
-  if (delivery === "Delivery" && (
-    address.includes("eldorado park") || address.includes("eldos") ||
-    address.includes("klipspruit west") || address.includes("klipspruit")
-  )) {
-    deliveryFee = 0;
-  } else if (delivery === "Delivery") {
-    deliveryFee = 20; // Standard fee outside free zones
-  }
+      let totalTrays = pastTrays + trays;
+      let freebiesEarned = Math.floor(totalTrays / 13);
+      if (!isBlackFriday()) { // Skip on BF
+        loyaltyStatus = `Loyalty: ${totalTrays}/13 trays to freebie${freebiesEarned > 0 ? ` (Freebie unlocked! -R65)` : ''}`;
+        if (freebiesEarned > 0) {
+          loyaltyDiscount = 65; // Apply discount
+        }
+      }
 
-  // NEW: Fetch past trays if phone entered (async)
-  let pastTrays = 0;
-  if (phone && phone.length >= 10) { // Basic SA num check
-    try {
-      const response = await fetch(scriptURL, {
-        method: "POST",
-        body: JSON.stringify({ action: 'getLoyalty', phone: phone }),
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        mode: 'no-cors' // Matches your setup
-      });
-      // no-cors can't read response, but since GAS returns JSON, we use a workaround: proxy via a GET echo or assume success
-      // Wait—your script returns JSON, but no-cors blocks read. Quick fix: Add a simple GET endpoint in GAS for loyalty (below), or use a CORS proxy if needed.
-      // For now, simulate with localStorage fallback (real fetch needs CORS tweak—see note below)
-      const storedPast = localStorage.getItem(`loyalty_${phone}`) || 0;
-      pastTrays = parseInt(storedPast) || 0;
-    } catch (err) {
-      console.warn("Loyalty fetch issue:", err); // Fallback to 0
+      let total = base + deliveryFee + paymentFee - loyaltyDiscount;
+      document.getElementById("total").textContent = `Total: R${total.toFixed(2)}${isBlackFriday() ? ' (BF Special! 💥)' : ''}`;
+      document.getElementById("loyalty-status").textContent = loyaltyStatus;
+
+      return {
+        total: total,
+        loyaltyDiscount: loyaltyDiscount,
+        pointsEarned: trays,
+        loyaltyStatus: loyaltyStatus
+      };
     }
-  }
-
-  let totalTrays = pastTrays + trays;
-  let freebiesEarned = Math.floor(totalTrays / 13);
-  if (!isBlackFriday()) { // Skip on BF
-    loyaltyStatus = `Loyalty: ${totalTrays}/13 trays to freebie${freebiesEarned > 0 ? ` (Freebie unlocked! -R65)` : ''}`;
-    if (freebiesEarned > 0) {
-      loyaltyDiscount = 65; // Apply discount
-    }
-  }
-
-  let total = base + deliveryFee + paymentFee - loyaltyDiscount;
-  document.getElementById("total").textContent = `Total: R${total.toFixed(2)}${isBlackFriday() ? ' (BF Special! 💥)' : ''}`;
-  document.getElementById("loyalty-status").textContent = loyaltyStatus;
-
-  return {
-    total: total,
-    loyaltyDiscount: loyaltyDiscount,
-    pointsEarned: trays,
-    loyaltyStatus: loyaltyStatus
-  };
-}
-
-// Updated listeners (call async getPricing)
-document.getElementById("phone").addEventListener("blur", async () => {
-  await getPricing(); // Await to handle fetch
-});
-document.getElementById("quantity").addEventListener("change", getPricing);
-document.getElementById("delivery").addEventListener("change", getPricing);
-document.getElementById("payment").addEventListener("change", getPricing);
-document.getElementById("recurring").addEventListener("change", getPricing);
-document.getElementById("address").addEventListener("blur", getPricing);
-
-// On load (unchanged)
-window.addEventListener("load", () => {
-  getPricing();
-  // BF mode...
-});
+    // Updated listeners (async where needed)
+    document.getElementById("phone").addEventListener("blur", async () => {
+      await getPricing();
+    });
+    document.getElementById("quantity").addEventListener("change", getPricing);
+    document.getElementById("delivery").addEventListener("change", getPricing);
+    document.getElementById("payment").addEventListener("change", getPricing);
+    document.getElementById("recurring").addEventListener("change", getPricing);
+    document.getElementById("address").addEventListener("blur", getPricing);
+    // Call on load
+    window.addEventListener("load", async () => {
+      await getPricing();
       // Apply BF dark theme on load
       if (isBlackFriday()) {
         document.body.classList.add('bf-mode');
@@ -450,114 +427,12 @@ window.addEventListener("load", () => {
       getPricing(); // Recalc after change
     });
      // Commenting the QR section out its not working
-    /*/ PayShap QR on Payment Select
-    paymentSelect.addEventListener("change", () => { -->
+    /* PayShap QR on Payment Select
+    paymentSelect.addEventListener("change", () => {
       if (paymentSelect.value === "PayShap") {
         // Generate QR on payment select (immediate, larger 200x200 for easy scan)
         const shapId = '+27-832000088'; // Your cellphone ShapID (e.g., '0821234567')
         const refNum = 'EGG-' + Date.now().toString().slice(-4); // Simple ref (e.g., EGG-4567)
         const amount = document.getElementById("total").textContent.replace(/[^0-9.]/g, ''); // Extract R130 to 130
         const qrText = 'payShap://pay?shapId=' + shapId + '&amount=' + amount + '&reference=' + refNum;
-        const qrContainer = document.getElementById("payShapQR") || document.createElement('div');
-        qrContainer.id = "payShapQR";
-        qrContainer.innerHTML = '<p style="font-weight: bold; color: #d97706;">Scan to Pay via PayShap:</p>';
-        new QRCode(qrContainer, {
-          text: qrText,
-          width: 200, // Larger for easy scan
-          height: 200,
-          colorDark: "#000000",
-          colorLight: "#ffffff",
-          correctLevel: QRCode.CorrectLevel.H
-        });
-        document.body.appendChild(qrContainer);
-      } else if (document.getElementById("payShapQR")) {
-        document.getElementById("payShapQR").remove(); // Hide QR for other payments
-      }
-    }); */
-    // FULLY DISABLED: WhatsApp build/send (no functions, no open—pure email/sheet flow)
-    // Stylish submit with animation (NO WA—email only)
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const data = {
-        name: document.getElementById("name").value.trim(),
-        phone: document.getElementById("phone").value.trim(),
-        quantity: document.getElementById("quantity").value,
-        payment: document.getElementById("payment").value,
-        delivery: document.getElementById("delivery").value,
-        recurring: recurringToggle.checked ? document.getElementById("recurring").value : "one-time", // Capture recurring
-        address: document.getElementById("address").value.trim(),
-        notes: document.getElementById("notes").value.trim()
-      };
-      // Calc pricing & set data fields
-      const pricing = getPricing();
-      data.total = pricing.total;
-      data.loyaltyDiscount = pricing.loyaltyDiscount;
-      data.pointsEarned = pricing.pointsEarned;
-      data.loyaltyStatus = pricing.loyaltyStatus;
-      // Track event (add recurring)
-      gtag('event', 'order_submit', {
-        'quantity': data.quantity,
-        'payment': data.payment,
-        'delivery': data.delivery,
-        'recurring': data.recurring,
-        'total': data.total
-      });
-      // NO WHATSAPP: Skip entirely
-      // Stylish submit: Disable button, show loading
-      submitBtn.disabled = true;
-      submitBtn.classList.add('loading');
-      submitBtn.textContent = 'Delivering...';
-      // Fetch FIRST (async, non-blocking for animations)
-      if (data.name && data.phone && data.quantity) {
-        fetch(scriptURL, {
-          method: "POST",
-          body: JSON.stringify(data),
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          mode: 'no-cors' // Silent CORS for submit
-        })
-        .then(() => {
-          console.log("Sheet/email logged successfully"); // Debug: Check console
-        })
-        .catch(err => {
-          console.error("Silent fetch issue:", err);
-        });
-      } else {
-        console.warn("Invalid data—skipping submit");
-      }
-      // Show success after short delay (animations fire here)
-      setTimeout(() => {
-        document.getElementById("message").textContent = "✅ Order submitted successfully! Check email for details.";
-        form.reset();
-        addressInput.readOnly = false;
-        // Van animation (debug: log if created)
-        const van = document.createElement('div');
-        van.innerHTML = '🚐🥚🥚🥚'; // Van with eggs
-        van.className = 'van-animation';
-        document.body.appendChild(van);
-        console.log("Van animation added"); // Debug: Check console
-        setTimeout(() => {
-          van.remove();
-          console.log("Van removed"); // Debug
-        }, 3000);
-        // Confetti burst (debug: log if fired)
-        if (typeof confetti !== 'undefined') {
-          confetti({
-            particleCount: 100,
-            spread: 70,
-            origin: { y: 0.6 },
-            colors: ['#f59e0b', '#d97706', '#fff8e1', '#10b981']
-          });
-          console.log("Confetti fired"); // Debug
-        } else {
-          console.warn("Confetti lib not loaded");
-        }
-        // Re-enable button
-        submitBtn.disabled = false;
-        submitBtn.classList.remove('loading');
-        submitBtn.textContent = 'Submit Order';
-      }, 1500);
-    });
-  </script>
-</body>
-</html>
-
+        const qrContainer =
