@@ -156,7 +156,6 @@
     #payShapQR canvas {
       margin: 10px 0;
     }
-
     /* Enhanced Pricing Display for Maximum Clarity */
     #pricing {
       text-align: center;
@@ -184,7 +183,6 @@
       margin-bottom: 5px;
       font-size: 0.9em;
     }
-
     /* Simple Dark Theme for Black Friday (applied via JS class) */
     body.bf-mode {
       background: #121212; /* Dark background */
@@ -246,8 +244,7 @@
   </style>
 </head>
 <body>
-  
-
+ 
   <h1>🥚 EGGnificent Orders</h1>
   <form id="orderForm">
     <input type="text" id="name" placeholder="👤 Full Name" required autocomplete="name" />
@@ -309,7 +306,16 @@
     // Toggle recurring dropdown
     recurringToggle.addEventListener("change", () => {
       recurringSelect.style.display = recurringToggle.checked ? "block" : "none";
+      if (recurringToggle.checked && !recurringSelect.value) {
+        recurringSelect.value = "weekly"; // Default to weekly if none selected
+      }
       getPricing(); // Recalc if pricing affects recurring
+    });
+    recurringSelect.addEventListener("change", () => {
+      if (recurringToggle.checked && !recurringSelect.value) {
+        recurringSelect.value = "weekly"; // Enforce selection
+      }
+      getPricing();
     });
     // Black Friday Check
     function isBlackFriday() {
@@ -325,20 +331,20 @@
       const payment = document.getElementById("payment").value;
       const recurring = recurringToggle.checked ? document.getElementById("recurring").value : "one-time";
       const address = document.getElementById("address").value.toLowerCase(); // For suburb check
-     
+    
       if (!quantity || !delivery || !payment) {
         document.getElementById("total").textContent = "Total: R0.00";
         document.getElementById("loyalty-status").textContent = "";
         return { total: 0, loyaltyDiscount: 0, pointsEarned: 0, loyaltyStatus: "" };
       }
-     
+    
       let trays = parseInt(quantity.match(/\d+/)?.[0] || 0); // Extract number from "2 Trays"
       let base = isBlackFriday() ? (trays * 59) : (trays * 65); // BF override: R59/tray
       let deliveryFee = 0;
       let paymentFee = 0;
       let loyaltyDiscount = 0;
       let loyaltyStatus = "";
-     
+    
       if (delivery === "Delivery" && (
         address.includes("eldorado park") || address.includes("eldos") ||
         address.includes("klipspruit west") || address.includes("klipspruit")
@@ -347,16 +353,16 @@
       } else if (delivery === "Delivery") {
         deliveryFee = 20; // Standard fee outside free zones
       }
-     
+    
       // Loyalty logic (commented/skipped on BF)
       if (!isBlackFriday()) {
         loyaltyStatus = "Loyalty: 0/12 trays to freebie";
       } // else: loyaltyStatus remains "", hiding it
-     
+    
       let total = base + deliveryFee + paymentFee - loyaltyDiscount;
       document.getElementById("total").textContent = `Total: R${total.toFixed(2)}${isBlackFriday() ? ' (BF Special! 💥)' : ''}`;
       document.getElementById("loyalty-status").textContent = loyaltyStatus;
-     
+    
       return {
         total: total,
         loyaltyDiscount: loyaltyDiscount,
@@ -416,7 +422,39 @@
         document.getElementById("payShapQR").remove(); // Hide QR for other payments
       }
     }); */
-    // Stylish submit with animation
+    // NEW: Build WhatsApp message function to ensure recurring and notes are included
+    function buildWhatsAppMessage(data, pricing) {
+      let message = `New order details:\n\n`;
+      message += `Name: ${data.name}\n`;
+      message += `Phone: ${data.phone}\n`;
+      message += `Quantity: ${data.quantity}\n`;
+      message += `Payment: ${data.payment}\n`;
+      message += `Delivery Type: ${data.delivery}\n`;
+      if (data.delivery === 'Delivery') {
+        message += `Address: ${data.address}\n`;
+      }
+      // Include recurring if set (beyond "one-time")
+      if (data.recurring !== "one-time") {
+        const freqMap = {
+          "weekly": "Weekly",
+          "bi-weekly": "Bi-weekly",
+          "monthly": "Monthly"
+        };
+        const freqDisplay = freqMap[data.recurring] || data.recurring;
+        message += `\nRecurring: Yes (${freqDisplay})\n`;
+      }
+      // Include notes if provided
+      if (data.notes.trim()) {
+        message += `Notes: ${data.notes}\n`;
+      }
+      message += `\nTotal: R${pricing.total.toFixed(2)}`;
+
+      return message;
+    }
+    // NEW: Your WhatsApp business number (update this to yours, e.g., 27123456789 without +)
+    const whatsappNumber = '27123456789'; // Replace with your actual number
+
+    // Stylish submit with animation + WhatsApp send
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       const data = {
@@ -443,13 +481,17 @@
         'recurring': data.recurring,
         'total': data.total
       });
+      // NEW: Build and send WhatsApp message
+      const message = buildWhatsAppMessage(data, pricing);
+      const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank'); // Opens in new tab/window for easy copy-paste if needed
       // Stylish submit: Disable button, show loading
       submitBtn.disabled = true;
       submitBtn.classList.add('loading');
       submitBtn.textContent = 'Delivering...';
       // Show success after short delay
       setTimeout(() => {
-        document.getElementById("message").textContent = "✅ Order submitted successfully!";
+        document.getElementById("message").textContent = "✅ Order submitted successfully! Check WhatsApp for details.";
         form.reset();
         addressInput.readOnly = false;
         // Van animation
@@ -472,7 +514,7 @@
         submitBtn.classList.remove('loading');
         submitBtn.textContent = 'Submit Order';
       }, 1500);
-      // Fetch (only if data is valid—prevent dupes/empties)
+      // Fetch (only if data is valid—prevent dupes/empties) - Keep for sheet logging
       if (data.name && data.phone && data.quantity) {
         fetch(scriptURL, {
           method: "POST",
