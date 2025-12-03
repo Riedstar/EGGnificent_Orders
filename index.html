@@ -422,7 +422,8 @@
         document.getElementById("payShapQR").remove(); // Hide QR for other payments
       }
     }); */
-    // NEW: Build WhatsApp message function to ensure recurring and notes are included
+    // COMMENTED: WhatsApp build/send (re-enable when ready)
+    /*
     function buildWhatsAppMessage(data, pricing) {
       let message = `New order details:\n\n`;
       message += `Name: ${data.name}\n`;
@@ -451,10 +452,9 @@
 
       return message;
     }
-    // NEW: Your WhatsApp business number (update this to yours, e.g., 27123456789 without +)
     const whatsappNumber = '27123456789'; // Replace with your actual number
-
-    // Stylish submit with animation + WhatsApp send
+    */
+    // Stylish submit with animation (no WA for now)
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       const data = {
@@ -481,17 +481,19 @@
         'recurring': data.recurring,
         'total': data.total
       });
-      // NEW: Build and send WhatsApp message
+      // COMMENTED: WhatsApp open
+      /*
       const message = buildWhatsAppMessage(data, pricing);
       const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, '_blank'); // Opens in new tab/window for easy copy-paste if needed
+      window.open(whatsappUrl, '_blank');
+      */
       // Stylish submit: Disable button, show loading
       submitBtn.disabled = true;
       submitBtn.classList.add('loading');
       submitBtn.textContent = 'Delivering...';
       // Show success after short delay
       setTimeout(() => {
-        document.getElementById("message").textContent = "✅ Order submitted successfully! Check WhatsApp for details.";
+        document.getElementById("message").textContent = "✅ Order submitted successfully! Check email for details.";
         form.reset();
         addressInput.readOnly = false;
         // Van animation
