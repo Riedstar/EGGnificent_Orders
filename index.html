@@ -292,11 +292,11 @@
     <textarea id="notes" placeholder="📝 Example: 'Bring change for XXX amount' or 'Please deliver at 17h00'" required></textarea>
     <button type="submit" id="submitBtn">Submit Order</button>
   </form>
-  <!----
+  
   <div id="pricing">
     <div id="loyalty-status">Loyalty: 0/12 trays to freebie</div>
     <div id="total">Total: R0.00</div>
-  </div>-->
+  </div>
   <p id="message"></p>
   <script>
     const scriptURL = "https://script.google.com/macros/s/AKfycbwi8uc_Zc0JYv-1sOfpTJlUSo8SHORCJJ7I_ILrahd8ONzhN_9ARLRRUa26AZCnUD5W/exec";
@@ -319,8 +319,9 @@
       const bfEnd = new Date('2025-11-30');
       return today >= bfStart && today <= bfEnd;
     }
+    
     // Pricing & Loyalty function (returns calc values for display/submit)
-    function getPricing() {
+      function getPricing() {
       const quantity = document.getElementById("quantity").value;
       const delivery = document.getElementById("delivery").value;
       const payment = document.getElementById("payment").value;
@@ -364,6 +365,7 @@
         pointsEarned: trays,
         loyaltyStatus: loyaltyStatus
       };
+        //
     }
     // Listen for changes
     document.getElementById("phone").addEventListener("blur", getPricing);
@@ -494,5 +496,6 @@
   </script>
 </body>
 </html>
+
 
 
