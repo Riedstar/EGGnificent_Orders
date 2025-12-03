@@ -422,39 +422,8 @@
         document.getElementById("payShapQR").remove(); // Hide QR for other payments
       }
     }); */
-    // COMMENTED: WhatsApp build/send (re-enable when ready)
-    /*
-    function buildWhatsAppMessage(data, pricing) {
-      let message = `New order details:\n\n`;
-      message += `Name: ${data.name}\n`;
-      message += `Phone: ${data.phone}\n`;
-      message += `Quantity: ${data.quantity}\n`;
-      message += `Payment: ${data.payment}\n`;
-      message += `Delivery Type: ${data.delivery}\n`;
-      if (data.delivery === 'Delivery') {
-        message += `Address: ${data.address}\n`;
-      }
-      // Include recurring if set (beyond "one-time")
-      if (data.recurring !== "one-time") {
-        const freqMap = {
-          "weekly": "Weekly",
-          "bi-weekly": "Bi-weekly",
-          "monthly": "Monthly"
-        };
-        const freqDisplay = freqMap[data.recurring] || data.recurring;
-        message += `\nRecurring: Yes (${freqDisplay})\n`;
-      }
-      // Include notes if provided
-      if (data.notes.trim()) {
-        message += `Notes: ${data.notes}\n`;
-      }
-      message += `\nTotal: R${pricing.total.toFixed(2)}`;
-
-      return message;
-    }
-    const whatsappNumber = '27123456789'; // Replace with your actual number
-    */
-    // Stylish submit with animation (no WA for now)
+    // FULLY DISABLED: WhatsApp build/send (no functions, no open—pure email/sheet flow)
+    // Stylish submit with animation (NO WA—email only)
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       const data = {
@@ -481,42 +450,12 @@
         'recurring': data.recurring,
         'total': data.total
       });
-      // COMMENTED: WhatsApp open
-      /*
-      const message = buildWhatsAppMessage(data, pricing);
-      const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, '_blank');
-      */
+      // NO WHATSAPP: Skip entirely
       // Stylish submit: Disable button, show loading
       submitBtn.disabled = true;
       submitBtn.classList.add('loading');
       submitBtn.textContent = 'Delivering...';
-      // Show success after short delay
-      setTimeout(() => {
-        document.getElementById("message").textContent = "✅ Order submitted successfully! Check email for details.";
-        form.reset();
-        addressInput.readOnly = false;
-        // Van animation
-        const van = document.createElement('div');
-        van.innerHTML = '🚐🥚🥚🥚'; // Van with eggs
-        van.className = 'van-animation';
-        document.body.appendChild(van);
-        setTimeout(() => van.remove(), 3000);
-        // Confetti burst
-        if (typeof confetti !== 'undefined') {
-          confetti({
-            particleCount: 100,
-            spread: 70,
-            origin: { y: 0.6 },
-            colors: ['#f59e0b', '#d97706', '#fff8e1', '#10b981']
-          });
-        }
-        // Re-enable button
-        submitBtn.disabled = false;
-        submitBtn.classList.remove('loading');
-        submitBtn.textContent = 'Submit Order';
-      }, 1500);
-      // Fetch (only if data is valid—prevent dupes/empties) - Keep for sheet logging
+      // Fetch FIRST (async, non-blocking for animations)
       if (data.name && data.phone && data.quantity) {
         fetch(scriptURL, {
           method: "POST",
@@ -525,7 +464,7 @@
           mode: 'no-cors' // Silent CORS for submit
         })
         .then(() => {
-          // No .json() – no-cors blocks read, but data saves
+          console.log("Sheet/email logged successfully"); // Debug: Check console
         })
         .catch(err => {
           console.error("Silent fetch issue:", err);
@@ -533,6 +472,38 @@
       } else {
         console.warn("Invalid data—skipping submit");
       }
+      // Show success after short delay (animations fire here)
+      setTimeout(() => {
+        document.getElementById("message").textContent = "✅ Order submitted successfully! Check email for details.";
+        form.reset();
+        addressInput.readOnly = false;
+        // Van animation (debug: log if created)
+        const van = document.createElement('div');
+        van.innerHTML = '🚐🥚🥚🥚'; // Van with eggs
+        van.className = 'van-animation';
+        document.body.appendChild(van);
+        console.log("Van animation added"); // Debug: Check console
+        setTimeout(() => {
+          van.remove();
+          console.log("Van removed"); // Debug
+        }, 3000);
+        // Confetti burst (debug: log if fired)
+        if (typeof confetti !== 'undefined') {
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: ['#f59e0b', '#d97706', '#fff8e1', '#10b981']
+          });
+          console.log("Confetti fired"); // Debug
+        } else {
+          console.warn("Confetti lib not loaded");
+        }
+        // Re-enable button
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('loading');
+        submitBtn.textContent = 'Submit Order';
+      }, 1500);
     });
   </script>
 </body>
