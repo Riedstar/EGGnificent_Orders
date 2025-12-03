@@ -349,11 +349,11 @@
       } else if (delivery === "Delivery") {
         deliveryFee = 20; // Standard fee outside free zones
       }
-     
+       /* COMENT LOYALTY OUT UNTIL I HAVE A PROPER SOLUTION FOR IT
       // Loyalty logic (commented/skipped on BF)
       if (!isBlackFriday()) {
         loyaltyStatus = "Loyalty: 0/12 trays to freebie";
-      } // else: loyaltyStatus remains "", hiding it
+      } // else: loyaltyStatus remains "", hiding it */
      
       let total = base + deliveryFee + paymentFee - loyaltyDiscount;
       document.getElementById("total").textContent = `Total: R${total.toFixed(2)}${isBlackFriday() ? ' (BF Special! 💥)' : ''}`;
@@ -496,6 +496,7 @@
   </script>
 </body>
 </html>
+
 
 
 
