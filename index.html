@@ -18,14 +18,12 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Canvas Confetti for Animation -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <!-- QR Code for PayShap -->
-  <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>-->
   <!-- Stripe for Card Payments -->
   <script src="https://js.stripe.com/v3/"></script>
   <style>
     body {
       font-family: "Poppins", sans-serif;
-      background: linear-gradient(135deg, #fff8e1 0%, #fed7aa 50%, #ffedcc 100%); /* Eggshell to yolk fade for modern vibe */
+      background: linear-gradient(135deg, #fff8e1 0%, #fed7aa 50%, #ffedcc 100%);
       color: #333;
       padding: 20px;
       max-width: 500px;
@@ -35,7 +33,7 @@
     h1 {
       text-align: center;
       color: #d97706;
-      text-shadow: 0 2px 4px rgba(217, 119, 6, 0.2); /* Soft orange glow */
+      text-shadow: 0 2px 4px rgba(217, 119, 6, 0.2);
       margin-bottom: 30px;
       animation: fadeInDown 0.8s ease-out;
     }
@@ -47,56 +45,44 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
-      background: rgba(255, 255, 255, 0.9); /* Semi-transparent white for modern card feel */
+      background: rgba(255, 255, 255, 0.9);
       padding: 20px;
       border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(217, 119, 6, 0.1); /* Subtle shadow for depth */
+      box-shadow: 0 4px 20px rgba(217, 119, 6, 0.1);
     }
     input, select, textarea {
-      padding: 12px 10px; /* Slightly more padding for modern touch */
+      padding: 12px 10px;
       border-radius: 8px;
       border: 1px solid #ccc;
       font-size: 1em;
-      transition: border-color 0.3s ease; /* Smooth focus */
+      transition: border-color 0.3s ease;
     }
     input:focus, select:focus, textarea:focus {
-      border-color: #f59e0b; /* Orange glow on focus */
+      border-color: #f59e0b;
       outline: none;
     }
     input[readonly], textarea[readonly] {
       background-color: #f3f3f3;
     }
     button {
-      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); /* Gradient for depth */
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
       color: white;
-      padding: 14px; /* Taller for thumb-friendly mobile */
+      padding: 14px;
       border: none;
       border-radius: 8px;
       font-weight: bold;
       cursor: pointer;
-      transition: all 0.3s ease; /* Smooth hover */
+      transition: all 0.3s ease;
       position: relative;
       overflow: hidden;
     }
     button:hover {
-      transform: translateY(-2px); /* Lift on hover */
-      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); /* Orange shadow */
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
     }
     button:active {
-      transform: translateY(0); /* Press down */
+      transform: translateY(0);
     }
-    #message {
-      text-align: center;
-      font-weight: bold;
-      margin-top: 10px;
-      transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth show */
-    }
-    #message[style*="✅"] {
-      opacity: 1;
-      transform: scale(1.05);
-      color: #10b981; /* Green for success */
-    }
-    /* Loading Spinner in Button */
     button.loading::after {
       content: '';
       position: absolute;
@@ -114,7 +100,17 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-    /* Van Animation on Success */
+    #message {
+      text-align: center;
+      font-weight: bold;
+      margin-top: 10px;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    #message[style*="✅"] {
+      opacity: 1;
+      transform: scale(1.05);
+      color: #10b981;
+    }
     .van-animation {
       position: fixed;
       top: 50%;
@@ -127,7 +123,6 @@
       0% { transform: translateX(0) rotate(0deg); opacity: 1; }
       100% { transform: translateX(calc(100vw + 100px)) rotate(5deg); opacity: 0; }
     }
-    /* Confetti */
     .confetti {
       pointer-events: none;
       position: fixed;
@@ -137,7 +132,6 @@
       width: 100vw;
       height: 100vh;
     }
-    /* Recurring Checkbox Styling */
     #recurring-toggle {
       margin-right: 8px;
     }
@@ -145,19 +139,6 @@
       margin-left: 24px;
       transition: margin-left 0.3s ease;
     }
-    /* PayShap QR Styling */
-    #payShapQR {
-      text-align: center;
-      margin-top: 10px;
-      padding: 10px;
-      background: rgba(255, 255, 255, 0.9);
-      border-radius: 8px;
-    }
-    #payShapQR canvas {
-      margin: 10px 0;
-    }
-
-    /* Enhanced Pricing Display for Maximum Clarity */
     #pricing {
       text-align: center;
       margin-top: 15px;
@@ -165,18 +146,18 @@
       border-radius: 16px;
       font-weight: bold;
       animation: fadeInUp 0.5s ease-out;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     }
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
     #total {
-      font-size: 2em; /* Extra large for unmissable visibility */
-      color: #d97706; /* Bold orange by default */
+      font-size: 2em;
+      color: #d97706;
       font-weight: bold;
       margin-top: 8px;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+      text-shadow: 0 1px 2px rgba(0,0,0,0.1);
     }
     #loyalty-status {
       color: #d97706;
@@ -184,17 +165,26 @@
       margin-bottom: 5px;
       font-size: 0.9em;
     }
-
-    /* Simple Dark Theme for Black Friday (applied via JS class) */
+    /* PayShap Instructions Styling */
+    #paymentInstructions {
+      max-width: 420px;
+      margin: 30px auto;
+    }
+    #payAmount {
+      font-size: 1.8em;
+      color: #d97706;
+      font-weight: 800;
+    }
+    /* Dark Theme for Black Friday */
     body.bf-mode {
-      background: #121212; /* Dark background */
-      color: #e0e0e0; /* Light text */
+      background: #121212;
+      color: #e0e0e0;
     }
     body.bf-mode h1 {
-      color: #ff6b35; /* Brighter orange for dark mode */
+      color: #ff6b35;
     }
     body.bf-mode form {
-      background: rgba(255, 255, 255, 0.05); /* Dark semi-transparent */
+      background: rgba(255, 255, 255, 0.05);
       color: #e0e0e0;
     }
     body.bf-mode input, body.bf-mode select, body.bf-mode textarea {
@@ -205,32 +195,21 @@
     body.bf-mode input::placeholder, body.bf-mode textarea::placeholder {
       color: #888;
     }
-    body.bf-mode input:focus, body.bf-mode select:focus, body.bf-mode textarea:focus {
-      border-color: #ff6b35;
-    }
     body.bf-mode button {
-      background: linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%); /* Darker orange gradient */
-    }
-    body.bf-mode button:hover {
-      box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+      background: linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%);
     }
     body.bf-mode #pricing {
-      background: #2a2a2a; /* Solid dark gray for strong contrast */
-      border: 2px solid #ff6b35; /* Thick orange border */
-      color: #fff; /* White text base */
-      padding: 25px; /* More padding for breathing room */
-      box-shadow: 0 6px 25px rgba(255, 107, 53, 0.3); /* Glowing orange shadow */
+      background: #2a2a2a;
+      border: 2px solid #ff6b35;
+      color: #fff;
+      box-shadow: 0 6px 25px rgba(255, 107, 53, 0.3);
+    }
+    body.bf-mode #total {
+      color: #fff;
+      text-shadow: 0 0 15px #ff6b35;
     }
     body.bf-mode #loyalty-status {
       color: #ff6b35;
-    }
-    body.bf-mode #total {
-      color: #fff; /* Pure white for max visibility */
-      font-size: 2.2em; /* Huge in dark mode */
-      text-shadow: 0 0 15px #ff6b35, 0 2px 4px rgba(0, 0, 0, 0.5); /* Bright orange glow + dark shadow */
-    }
-    body.bf-mode #message[style*="✅"] {
-      color: #10b981;
     }
     .bf-banner {
       background: #ff6b35;
@@ -241,14 +220,14 @@
       font-weight: bold;
       font-size: 1.2em;
       margin-bottom: 20px;
-      display: none; /* Hidden by default, shown via JS */
+      display: none;
     }
   </style>
 </head>
 <body>
-  
 
   <h1>🥚 EGGnificent Orders</h1>
+
   <form id="orderForm">
     <input type="text" id="name" placeholder="👤 Full Name" required autocomplete="name" />
     <input type="tel" id="phone" placeholder="📱 Phone Number" required autocomplete="tel" />
@@ -267,9 +246,8 @@
     </select>
     <select id="payment" required>
       <option value="">💳 Select Payment Method</option>
-      <option value="Cash">Cash</option>
-      <option value="Card">Card</option>
-      <!-- <option value="PayShap">PayShap</option> --> <!--Commenting out for now since its creating issues in the build -->
+      <option value="PayShap">PayShap (Instant Bank Tranfer)</option>
+      <option value="Cash/Card">Cash/Card on Collection</option>
     </select>
     <select id="delivery" required>
       <option value="">🚚 Select Delivery Option</option>
@@ -292,12 +270,29 @@
     <textarea id="notes" placeholder="📝 Example: 'Bring change for XXX amount' or 'Please deliver at 17h00'" required></textarea>
     <button type="submit" id="submitBtn">Submit Order</button>
   </form>
-  
+
   <div id="pricing">
     <div id="loyalty-status">Loyalty: 0/12 trays to freebie</div>
     <div id="total">Total: R0.00</div>
   </div>
+
   <p id="message"></p>
+
+  <!-- PayShap Payment Instructions (shown after success) -->
+  <div id="paymentInstructions" style="display: none; text-align: center; margin: 30px auto; max-width: 420px; padding: 20px; background: rgba(255, 255, 255, 0.95); border-radius: 16px; box-shadow: 0 6px 24px rgba(217, 119, 6, 0.2); border: 2px solid #d97706;">
+    <h3 style="color: #d97706; margin-bottom: 15px;">Pay via PayShap – Instant & Secure!</h3>
+    <p style="font-size: 1.25em; margin-bottom: 20px; font-weight: bold;">
+      Amount due: <span id="payAmount" style="color: #d97706; font-size: 1.6em;">R0.00</span>
+    </p>
+    <p>Scan this QR code with your banking app (Capitec or any PayShap-enabled bank):</p>
+    <img src="payshap-qr.jpeg" alt="Capitec PayShap QR Code – Scan to Pay" style="width: 260px; height: 260px; margin: 20px auto; display: block; border: 4px solid #d97706; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.15);">
+    <p style="margin-top: 15px; font-weight: 600;">Reference suggestion: Your name or phone number</p>
+    <p style="font-size: 0.95em; color: #555; margin-top: 12px;">
+      Payment reflects instantly — we'll confirm receipt via WhatsApp/email shortly.<br>
+      Thank you for choosing EGGnificent! 🥚💸
+    </p>
+  </div>
+
   <script>
     const scriptURL = "https://script.google.com/macros/s/AKfycbwi8uc_Zc0JYv-1sOfpTJlUSo8SHORCJJ7I_ILrahd8ONzhN_9ARLRRUa26AZCnUD5W/exec";
     const form = document.getElementById("orderForm");
@@ -307,11 +302,50 @@
     const recurringToggle = document.getElementById("recurring-toggle");
     const recurringSelect = document.getElementById("recurring");
     const paymentSelect = document.getElementById("payment");
+	
+	// New Option when cash/card on delivery is selected, delivery option becomes irrelevant
+	
+	// When payment method changes, control delivery field
+	paymentSelect.addEventListener("change", () => {
+	const payment = paymentSelect.value;
+	const isCollectionOnly = payment === "Cash/Card";
+
+	if (isCollectionOnly) {
+    // Force Collection + disable delivery select
+    deliverySelect.value = "Collection";
+    deliverySelect.disabled = true;
+    // Auto-set address to collection point
+    addressInput.value = "No 17 Lucas Street Ext 9 Eldorado Park 1811";
+    addressInput.readOnly = true;
+	} else {
+    // Re-enable delivery select
+    deliverySelect.disabled = false;
+    // If previously set to Collection, clear address unless they choose Collection again
+    if (deliverySelect.value === "Collection") {
+      addressInput.value = "";
+      addressInput.readOnly = false;
+    }
+	}
+
+	getPricing(); // Recalculate total in case delivery fee changes
+	});
+
+	// Also trigger on load (in case of page refresh or pre-filled values)
+	window.addEventListener("load", () => {
+	// ... your existing load code ...
+	// Trigger payment logic on load if a value is pre-selected
+	if (paymentSelect.value) {
+    paymentSelect.dispatchEvent(new Event("change"));
+	}
+	});
+	
+
     // Toggle recurring dropdown
     recurringToggle.addEventListener("change", () => {
       recurringSelect.style.display = recurringToggle.checked ? "block" : "none";
-      getPricing(); // Recalc if pricing affects recurring
+      getPricing();
     });
+
     // Black Friday Check
     function isBlackFriday() {
       const today = new Date();
@@ -319,54 +353,49 @@
       const bfEnd = new Date('2025-11-30');
       return today >= bfStart && today <= bfEnd;
     }
-    
-    // Pricing & Loyalty function (returns calc values for display/submit)
-      function getPricing() {
+
+    // Pricing & Loyalty function
+    function getPricing() {
       const quantity = document.getElementById("quantity").value;
       const delivery = document.getElementById("delivery").value;
       const payment = document.getElementById("payment").value;
       const recurring = recurringToggle.checked ? document.getElementById("recurring").value : "one-time";
-      const address = document.getElementById("address").value.toLowerCase(); // For suburb check
-     
+      const address = document.getElementById("address").value.toLowerCase();
+
       if (!quantity || !delivery || !payment) {
         document.getElementById("total").textContent = "Total: R0.00";
         document.getElementById("loyalty-status").textContent = "";
         return { total: 0, loyaltyDiscount: 0, pointsEarned: 0, loyaltyStatus: "" };
       }
-     
-      let trays = parseInt(quantity.match(/\d+/)?.[0] || 0); // Extract number from "2 Trays"
-      let base = isBlackFriday() ? (trays * 59) : (trays * 65); // BF override: R59/tray
+
+      let trays = parseInt(quantity.match(/\d+/)?.[0] || 0);
+      let base = isBlackFriday() ? (trays * 59) : (trays * 65);
       let deliveryFee = 0;
       let paymentFee = 0;
       let loyaltyDiscount = 0;
       let loyaltyStatus = "";
-     
+
       if (delivery === "Delivery" && (
         address.includes("eldorado park") || address.includes("eldos") ||
         address.includes("klipspruit west") || address.includes("klipspruit")
       )) {
         deliveryFee = 0;
       } else if (delivery === "Delivery") {
-        deliveryFee = 20; // Standard fee outside free zones
+        deliveryFee = 20;
       }
-       /* COMENT LOYALTY OUT UNTIL I HAVE A PROPER SOLUTION FOR IT
-      // Loyalty logic (commented/skipped on BF)
-      if (!isBlackFriday()) {
-        loyaltyStatus = "Loyalty: 0/12 trays to freebie";
-      } // else: loyaltyStatus remains "", hiding it */
-     
+
       let total = base + deliveryFee + paymentFee - loyaltyDiscount;
       document.getElementById("total").textContent = `Total: R${total.toFixed(2)}${isBlackFriday() ? ' (BF Special! 💥)' : ''}`;
       document.getElementById("loyalty-status").textContent = loyaltyStatus;
-     
+
       return {
         total: total,
         loyaltyDiscount: loyaltyDiscount,
         pointsEarned: trays,
         loyaltyStatus: loyaltyStatus
       };
-        //
     }
+
     // Listen for changes
     document.getElementById("phone").addEventListener("blur", getPricing);
     document.getElementById("quantity").addEventListener("change", getPricing);
@@ -374,16 +403,17 @@
     document.getElementById("payment").addEventListener("change", getPricing);
     document.getElementById("recurring").addEventListener("change", getPricing);
     document.getElementById("address").addEventListener("blur", getPricing);
-    // Call on load
+
+    // Initial pricing on load
     window.addEventListener("load", () => {
       getPricing();
-      // Apply BF dark theme on load
       if (isBlackFriday()) {
         document.body.classList.add('bf-mode');
         document.getElementById('bfBanner').style.display = 'block';
       }
     });
-    // Automatically set the address when "Collection" is selected
+
+    // Auto-set address for Collection
     deliverySelect.addEventListener("change", () => {
       if (deliverySelect.value === "Collection") {
         addressInput.value = "No 17 Lucas Street Ext 9 Eldorado Park 1811";
@@ -392,34 +422,10 @@
         addressInput.value = "";
         addressInput.readOnly = false;
       }
-      getPricing(); // Recalc after change
+      getPricing();
     });
-     // Commenting the QR section out its not working
-    /*/ PayShap QR on Payment Select
-    paymentSelect.addEventListener("change", () => { -->
-      if (paymentSelect.value === "PayShap") {
-        // Generate QR on payment select (immediate, larger 200x200 for easy scan)
-        const shapId = '+27-832000088'; // Your cellphone ShapID (e.g., '0821234567')
-        const refNum = 'EGG-' + Date.now().toString().slice(-4); // Simple ref (e.g., EGG-4567)
-        const amount = document.getElementById("total").textContent.replace(/[^0-9.]/g, ''); // Extract R130 to 130
-        const qrText = 'payShap://pay?shapId=' + shapId + '&amount=' + amount + '&reference=' + refNum;
-        const qrContainer = document.getElementById("payShapQR") || document.createElement('div');
-        qrContainer.id = "payShapQR";
-        qrContainer.innerHTML = '<p style="font-weight: bold; color: #d97706;">Scan to Pay via PayShap:</p>';
-        new QRCode(qrContainer, {
-          text: qrText,
-          width: 200, // Larger for easy scan
-          height: 200,
-          colorDark: "#000000",
-          colorLight: "#ffffff",
-          correctLevel: QRCode.CorrectLevel.H
-        });
-        document.body.appendChild(qrContainer);
-      } else if (document.getElementById("payShapQR")) {
-        document.getElementById("payShapQR").remove(); // Hide QR for other payments
-      }
-    }); */
-    // Stylish submit with animation
+
+    // Form submission
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       const data = {
@@ -428,17 +434,17 @@
         quantity: document.getElementById("quantity").value,
         payment: document.getElementById("payment").value,
         delivery: document.getElementById("delivery").value,
-        recurring: recurringToggle.checked ? document.getElementById("recurring").value : "one-time", // Capture recurring
+        recurring: recurringToggle.checked ? document.getElementById("recurring").value : "one-time",
         address: document.getElementById("address").value.trim(),
         notes: document.getElementById("notes").value.trim()
       };
-      // Calc pricing & set data fields
+
       const pricing = getPricing();
       data.total = pricing.total;
       data.loyaltyDiscount = pricing.loyaltyDiscount;
       data.pointsEarned = pricing.pointsEarned;
       data.loyaltyStatus = pricing.loyaltyStatus;
-      // Track event (add recurring)
+
       gtag('event', 'order_submit', {
         'quantity': data.quantity,
         'payment': data.payment,
@@ -446,22 +452,40 @@
         'recurring': data.recurring,
         'total': data.total
       });
-      // Stylish submit: Disable button, show loading
+
       submitBtn.disabled = true;
       submitBtn.classList.add('loading');
       submitBtn.textContent = 'Delivering...';
-      // Show success after short delay
+
       setTimeout(() => {
         document.getElementById("message").textContent = "✅ Order submitted successfully!";
+
+        // Show PayShap instructions (unless Cash)
+        /*if (data.payment !== "Cash") {
+          document.getElementById("payAmount").textContent = "R" + pricing.total.toFixed(2);
+          document.getElementById("paymentInstructions").style.display = "block";
+          document.getElementById("paymentInstructions").scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+		*/
+		
+		// Show PayShap QR only if PayShap was selected
+		if (data.payment === "PayShap") {
+		document.getElementById("payAmount").textContent = "R" + pricing.total.toFixed(2);
+		document.getElementById("paymentInstructions").style.display = "block";
+		document.getElementById("paymentInstructions").scrollIntoView({ behavior: "smooth", block: "center" });
+		} else {
+		  document.getElementById("paymentInstructions").style.display = "none";
+		}
+
         form.reset();
         addressInput.readOnly = false;
-        // Van animation
+
         const van = document.createElement('div');
-        van.innerHTML = '🚐🥚🥚🥚'; // Van with eggs
+        van.innerHTML = '🚐🥚🥚🥚';
         van.className = 'van-animation';
         document.body.appendChild(van);
         setTimeout(() => van.remove(), 3000);
-        // Confetti burst
+
         if (typeof confetti !== 'undefined') {
           confetti({
             particleCount: 100,
@@ -470,33 +494,23 @@
             colors: ['#f59e0b', '#d97706', '#fff8e1', '#10b981']
           });
         }
-        // Re-enable button
+
         submitBtn.disabled = false;
         submitBtn.classList.remove('loading');
         submitBtn.textContent = 'Submit Order';
       }, 1500);
-      // Fetch (only if data is valid—prevent dupes/empties)
+
       if (data.name && data.phone && data.quantity) {
         fetch(scriptURL, {
           method: "POST",
           body: JSON.stringify(data),
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          mode: 'no-cors' // Silent CORS for submit
-        })
-        .then(() => {
-          // No .json() – no-cors blocks read, but data saves
-        })
-        .catch(err => {
+          mode: 'no-cors'
+        }).catch(err => {
           console.error("Silent fetch issue:", err);
         });
-      } else {
-        console.warn("Invalid data—skipping submit");
       }
     });
   </script>
 </body>
 </html>
-
-
-
-
